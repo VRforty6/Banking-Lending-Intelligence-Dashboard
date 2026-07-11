@@ -1,0 +1,14 @@
+# Text files
+* text=auto
+
+# Binary files
+*.pbix binary
+*.xlsx binary
+*.xls binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
