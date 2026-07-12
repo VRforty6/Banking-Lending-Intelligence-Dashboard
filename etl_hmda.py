@@ -43,21 +43,20 @@ def clean_chunk(df: pd.DataFrame) -> pd.DataFrame:
     # replace "", "NA", "N/A", "nan", and "<NA>" with pd.NA;
     # never convert a missing LEI into the literal string "nan"
     if 'lei' in cleaned.columns:
-        # We read LEI as string to prevent numeric conversion (e.g., float)
-        # which would lose precision and scientific notation.
-        # However, if we didn't specify dtype in read_csv, we handle it here.
-        # Replace the strings that indicate missing values with np.nan
-        na_strings = ['', 'NA', 'N/A', 'Exempt', 'nan', '<NA>']
-        cleaned['lei'] = cleaned['lei'].replace(na_strings, np.nan)
-        # Strip whitespace (only for non-nan values)
-        mask = cleaned['lei'].notna()
-        cleaned.loc[mask, 'lei'] = cleaned.loc[mask, 'lei'].str.strip()
-        # Convert empty strings (from stripping) to np.nan
-        cleaned['lei'] = cleaned['lei'].replace('', np.nan)
-        # Convert np.nan to pd.NA
-        cleaned['lei'] = cleaned['lei'].replace(np.nan, pd.NA)
-        # Convert to pandas StringDtype (nullable)
-        cleaned['lei'] = cleaned['lei'].astype('string')
+        # Always convert to pandas StringDtype first to avoid numeric conversion
+        # which would lose precision and produce scientific notation like 12345678901234.0
+        cleaned["lei"] = (
+            cleaned["lei"]
+                .astype("string")
+                .str.strip()
+                .replace({
+                    "": pd.NA,
+                    "NA": pd.NA,
+                    "N/A": pd.NA,
+                    "nan": pd.NA,
+                    "<NA>": pd.NA
+                })
+        )
 
     return cleaned
 
@@ -85,7 +84,7 @@ def validate_chunk(
     df_copy = df.copy()
 
     # Initialize rejection_reason as empty string
-    df_copy['rejection_reater'] = ''
+    df_copy['rejection_reason'] = ''
 
     # Define conditions in the order they should appear in rejection_reason
     conditions = [
@@ -116,14 +115,8 @@ def validate_chunk(
     # Now separate valid and rejected rows
     # Valid rows have empty rejection_reason
     valid_mask = df_copy['rejection_reason'] == ''
-    valid_df = df_copy[valid_mask].drop(columns=['rejection_reason', 'rejection_reater'])
+    valid_df = df_copy[valid_mask].drop(columns=['rejection_reason'])
     rejected_df = df_copy[~valid_mask]
-
-    # Drop the helper column we added by mistake (rejection_reater)
-    if 'rejection_reater' in rejected_df.columns:
-        rejected_df = rejected_df.drop(columns=['rejection_reater'])
-    if 'rejection_reater' in valid_df.columns:
-        valid_df = valid_df.drop(columns=['rejection_reater'])
 
     return valid_df, rejected_df, counts
 
@@ -170,17 +163,15 @@ def etl_hmda(
 
     try:
         # Read CSV in chunks
-        # We specify dtype for LEI as string to prevent numeric conversion
-        # which would lose precision and produce scientific notation.
-        dtype_dict = {'lei': str} if 'lei' in pd.read_csv(input_path, nrows=0).columns else {}
+        # Read all columns as string to prevent per-chunk dtype inference
         for chunk_num, chunk in enumerate(
             pd.read_csv(
                 input_path,
                 chunksize=chunksize,
                 low_memory=False,
                 keep_default_na=True,
-                na_values=["", "NA", "N/A", "Exempt"],
-                dtype=dtype_dict if dtype_dict else None
+                na_values=["", "NA", "N/A", "Exempt", "nan", "<NA>"],
+                dtype="string"
             )
         ):
             total_rows += len(chunk)
@@ -207,6 +198,9 @@ def etl_hmda(
                     clean_writer = pq.ParquetWriter(
                         clean_path, table.schema, compression='snappy'
                     )
+                else:
+                    # Cast the table to the writer's schema
+                    table = table.cast(clean_writer.schema, safe=False)
                 clean_writer.write_table(table)
 
             # Write rejected chunk to Parquet
@@ -219,6 +213,9 @@ def etl_hmda(
                     rejected_writer = pq.ParquetWriter(
                         rejected_path, table.schema, compression='snappy'
                     )
+                else:
+                    # Cast the table to the writer's schema
+                    table = table.cast(rejected_writer.schema, safe=False)
                 rejected_writer.write_table(table)
 
     finally:
@@ -233,16 +230,24 @@ def etl_hmda(
 
     # Write validation report
     with open(report_path, 'w', encoding='utf-8') as f:
-        f.write('HMDA ETL Validation Report\\n')
-        f.write(f'Total rows processed: {total_rows}\\n')
-        f.write(f'Valid rows: {valid_rows}\\n')
-        f.write(f'Rejected rows: {rejected_rows}\\n')
-        f.write(f'Reconciliation difference: {reconciliation_difference}\\n')
-        f.write(f'Failed activity_year (missing): {reason_counts["missing_activity_year"]}\\n')
-        f.write(f'Failed lei (missing): {reason_counts["lei"]}\\n')
-        f.write(f'Failed loan_amount (invalid): {reason_counts["invalid_loan_amount"]}\\n')
-        f.write(f'Failed action_taken (invalid): {reason_counts["invalid_action_taken"]}\\n')
-
+       f.write("HMDA ETL Validation Report\n")
+       f.write(f"Total rows processed: {total_rows}\n")
+       f.write(f"Valid rows: {valid_rows}\n")
+       f.write(f"Rejected rows: {rejected_rows}\n")
+       f.write(f"Reconciliation difference: {reconciliation_difference}\n")
+       f.write(
+            f"Failed activity_year (missing): "
+            f"{reason_counts['missing_activity_year']}\n"
+     )
+       f.write(f"Failed lei (missing): {reason_counts['missing_lei']}\n")
+       f.write(
+           f"Failed loan_amount (invalid): "
+           f"{reason_counts['invalid_loan_amount']}\n"
+           )
+       f.write(
+           f"Failed action_taken (invalid): "
+           f"{reason_counts['invalid_action_taken']}\n"
+        )
     # Return reconciliation counts
     return {
         'total_rows_processed': total_rows,
@@ -250,7 +255,7 @@ def etl_hmda(
         'rejected_rows': rejected_rows,
         'reconciliation_difference': reconciliation_difference,
         'failed_activity_year': reason_counts['missing_activity_year'],
-        'failed_lei': reason_counts['lei'],
+        'failed_lei': reason_counts['missing_lei'],
         'failed_loan_amount': reason_counts['invalid_loan_amount'],
         'failed_action_taken': reason_counts['invalid_action_taken']
     }

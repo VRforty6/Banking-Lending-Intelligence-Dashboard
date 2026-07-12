@@ -1,0 +1,9 @@
+HMDA ETL Validation Report
+Total rows processed: 1161292
+Valid rows: 1161292
+Rejected rows: 0
+Reconciliation difference: 0
+Failed activity_year (missing): 0
+Failed lei (missing): 0
+Failed loan_amount (invalid): 0
+Failed action_taken (invalid): 0
