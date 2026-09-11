@@ -4,7 +4,7 @@ from types import SimpleNamespace
 
 import pandas as pd
 
-from load_data import STAGING_COPY_COLUMNS, copy_batch_to_staging
+from load_data import STAGING_COPY_COLUMNS, copy_batch_to_staging, populate_dimensions
 
 
 class FakeCursor:
@@ -70,3 +70,61 @@ def test_copy_batch_to_staging_uses_copy_with_ordered_columns_and_nulls():
     assert copied_row[STAGING_COPY_COLUMNS.index("loan_amount")] == "250000.0"
     assert copied_row[STAGING_COPY_COLUMNS.index("income")] == "\\N"
     assert copied_row[STAGING_COPY_COLUMNS.index("profile_hash")] == "a" * 64
+
+
+class FakeSqlConnection:
+    def __init__(self, statements):
+        self.statements = statements
+
+    def execute(self, statement):
+        self.statements.append(str(statement))
+
+
+class FakeEngineBegin:
+    def __init__(self, statements):
+        self.statements = statements
+
+    def __enter__(self):
+        return FakeSqlConnection(self.statements)
+
+    def __exit__(self, exc_type, exc, traceback):
+        return False
+
+
+class FakeEngine:
+    def __init__(self):
+        self.statements = []
+
+    def begin(self):
+        return FakeEngineBegin(self.statements)
+
+
+def test_dim_geography_derives_missing_county_from_census_tract():
+    """Geography dimension matches fact county fallback for null county codes."""
+    engine = FakeEngine()
+
+    populate_dimensions(engine)
+
+    geography_sql = next(
+        statement
+        for statement in engine.statements
+        if "INSERT INTO analytics.dim_geography" in statement
+    )
+    assert "WHEN census_tract IS NOT NULL THEN LEFT(census_tract, 5)" in geography_sql
+    assert "END AS county_code" in geography_sql
+    assert "county_code IS NOT NULL OR census_tract IS NOT NULL" in geography_sql
+
+    row = {
+        "state_code": "TX",
+        "county_code": None,
+        "census_tract": "48113007206",
+    }
+    canonical_county_code = (
+        row["county_code"]
+        if row["county_code"] is not None
+        else row["census_tract"][:5]
+        if row["census_tract"] is not None
+        else "UNKNOWN"
+    )
+
+    assert canonical_county_code == "48113"

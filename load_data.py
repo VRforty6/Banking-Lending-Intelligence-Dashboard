@@ -492,7 +492,13 @@ def populate_dimensions(engine: Engine) -> None:
                 tract_one_to_four_family_homes, tract_median_age_of_housing_units
             )
             SELECT DISTINCT
-                state_code, county_code, census_tract,
+                state_code,
+                CASE
+                    WHEN county_code IS NOT NULL THEN county_code
+                    WHEN census_tract IS NOT NULL THEN LEFT(census_tract, 5)
+                    ELSE 'UNKNOWN'
+                END AS county_code,
+                census_tract,
                 CASE WHEN tract_population = '' THEN NULL ELSE tract_population::bigint END,
                 CASE WHEN tract_minority_population_percent = '' THEN NULL ELSE tract_minority_population_percent::double precision END,
                 CASE WHEN ffiec_msa_md_median_family_income = '' THEN NULL ELSE ffiec_msa_md_median_family_income::double precision END,
@@ -501,7 +507,9 @@ def populate_dimensions(engine: Engine) -> None:
                 CASE WHEN tract_one_to_four_family_homes = '' THEN NULL ELSE tract_one_to_four_family_homes::bigint END,
                 CASE WHEN tract_median_age_of_housing_units = '' THEN NULL ELSE tract_median_age_of_housing_units::int END
             FROM staging.hmda_raw
-            WHERE state_code IS NOT NULL AND county_code IS NOT NULL AND census_tract IS NOT NULL
+            WHERE state_code IS NOT NULL
+                AND (county_code IS NOT NULL OR census_tract IS NOT NULL)
+                AND census_tract IS NOT NULL
             ON CONFLICT (state_code, county_code, census_tract) DO NOTHING;
 		INSERT INTO analytics.dim_geography (
  			   state_code,
