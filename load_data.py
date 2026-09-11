@@ -21,6 +21,8 @@ import os
 import sys
 import hashlib
 import logging
+import csv
+from io import StringIO
 from datetime import datetime
 from pathlib import Path
 from typing import List, Dict, Any, Tuple
@@ -63,6 +65,110 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
+STAGING_COPY_COLUMNS = [
+    'stg_row_id',
+    'load_timestamp',
+    'activity_year',
+    'lei',
+    'derived_msa_md',
+    'state_code',
+    'county_code',
+    'census_tract',
+    'conforming_loan_limit',
+    'derived_loan_product_type',
+    'derived_dwelling_category',
+    'derived_ethnicity',
+    'derived_race',
+    'derived_sex',
+    'action_taken',
+    'purchaser_type',
+    'preapproval',
+    'loan_type',
+    'loan_purpose',
+    'lien_status',
+    'reverse_mortgage',
+    'open_end_line_of_credit',
+    'business_or_commercial_purpose',
+    'loan_amount',
+    'loan_to_value_ratio',
+    'interest_rate',
+    'rate_spread',
+    'hoepa_status',
+    'total_loan_costs',
+    'total_points_and_fees',
+    'origination_charges',
+    'discount_points',
+    'lender_credits',
+    'loan_term',
+    'prepayment_penalty_term',
+    'intro_rate_period',
+    'negative_amortization',
+    'interest_only_payment',
+    'balloon_payment',
+    'other_nonamortizing_features',
+    'property_value',
+    'construction_method',
+    'occupancy_type',
+    'manufactured_home_secured_property_type',
+    'manufactured_home_land_property_interest',
+    'total_units',
+    'multifamily_affordable_units',
+    'income',
+    'debt_to_income_ratio',
+    'applicant_credit_score_type',
+    'co_applicant_credit_score_type',
+    'applicant_ethnicity_1',
+    'applicant_ethnicity_2',
+    'applicant_ethnicity_3',
+    'applicant_ethnicity_4',
+    'applicant_ethnicity_5',
+    'co_applicant_ethnicity_1',
+    'co_applicant_ethnicity_2',
+    'co_applicant_ethnicity_3',
+    'co_applicant_ethnicity_4',
+    'co_applicant_ethnicity_5',
+    'applicant_ethnicity_observed',
+    'co_applicant_ethnicity_observed',
+    'applicant_race_1',
+    'applicant_race_2',
+    'applicant_race_3',
+    'applicant_race_4',
+    'applicant_race_5',
+    'co_applicant_race_1',
+    'co_applicant_race_2',
+    'co_applicant_race_3',
+    'co_applicant_race_4',
+    'co_applicant_race_5',
+    'co_applicant_race_observed',
+    'applicant_sex',
+    'co_applicant_sex',
+    'applicant_sex_observed',
+    'co_applicant_sex_observed',
+    'applicant_age',
+    'co_applicant_age',
+    'applicant_age_above_62',
+    'co_applicant_age_above_62',
+    'submission_of_application',
+    'initially_payable_to_institution',
+    'aus_1',
+    'aus_2',
+    'aus_3',
+    'aus_4',
+    'aus_5',
+    'denial_reason_1',
+    'denial_reason_2',
+    'denial_reason_3',
+    'denial_reason_4',
+    'tract_population',
+    'tract_minority_population_percent',
+    'ffiec_msa_md_median_family_income',
+    'tract_to_msa_income_percentage',
+    'tract_owner_occupied_units',
+    'tract_one_to_four_family_homes',
+    'tract_median_age_of_housing_units',
+    'profile_hash',
+]
 # Attempt to load python-dotenv if available
 try:
     from dotenv import load_dotenv
@@ -250,6 +356,54 @@ def encode_utf8(s: str) -> bytes:
     """Encode string to UTF-8 bytes."""
     return s.encode('utf-8')
 
+def _get_driver_connection(sqlalchemy_connection):
+    """
+    Return the underlying DBAPI connection from a SQLAlchemy connection.
+
+    SQLAlchemy 2.x exposes this as driver_connection. Older versions expose a
+    compatible object through .connection.
+    """
+    raw_connection = sqlalchemy_connection.connection
+    if hasattr(raw_connection, "driver_connection"):
+        return raw_connection.driver_connection
+    return raw_connection.connection
+
+def build_copy_buffer(batch_df: pd.DataFrame) -> StringIO:
+    """Build an in-memory CSV buffer for PostgreSQL COPY."""
+    missing_columns = [
+        column for column in STAGING_COPY_COLUMNS if column not in batch_df.columns
+    ]
+    if missing_columns:
+        raise ValueError(
+            "Batch is missing staging column(s): "
+            + ", ".join(missing_columns)
+        )
+
+    ordered_df = batch_df.loc[:, STAGING_COPY_COLUMNS]
+    buffer = StringIO()
+    ordered_df.to_csv(
+        buffer,
+        index=False,
+        header=False,
+        na_rep="\\N",
+        quoting=csv.QUOTE_MINIMAL,
+        lineterminator="\n",
+    )
+    buffer.seek(0)
+    return buffer
+
+def copy_batch_to_staging(sqlalchemy_connection, batch_df: pd.DataFrame) -> None:
+    """COPY one prepared batch into staging.hmda_raw using psycopg2."""
+    columns_sql = ", ".join(f'"{column}"' for column in STAGING_COPY_COLUMNS)
+    copy_sql = f"""
+        COPY staging.hmda_raw ({columns_sql})
+        FROM STDIN WITH (FORMAT CSV, NULL '\\N', QUOTE '"', ESCAPE '"')
+    """
+    buffer = build_copy_buffer(batch_df)
+    driver_connection = _get_driver_connection(sqlalchemy_connection)
+    with driver_connection.cursor() as cursor:
+        cursor.copy_expert(copy_sql, buffer)
+
 def load_staging_data(engine: Engine, batch_size: int = 50000) -> Tuple[int, int]:
     """
     Load data from Parquet into staging.hmda_raw.
@@ -298,19 +452,9 @@ def load_staging_data(engine: Engine, batch_size: int = 50000) -> Tuple[int, int
         # Compute profile hash
         batch_df['profile_hash'] = compute_profile_hash(batch_df, profile_columns)
 
-        # Ensure column order matches the staging table (optional but good practice)
-        # We'll let pandas handle it; the to_sql method will use the DataFrame columns.
-
         try:
             with engine.begin() as conn:
-                batch_df.to_sql(
-                    name='hmda_raw',
-                    con=conn,
-                    schema='staging',
-                    if_exists='append',
-                    index=False,
-                    method='multi'
-                )
+                copy_batch_to_staging(conn, batch_df)
             total_loaded += batch_size_actual
             logger.info(
                 f"Loaded batch {batch_number} ({batch_size_actual} rows). "
