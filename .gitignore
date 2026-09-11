@@ -97,3 +97,6 @@ LayoutResourceMeasureInformation.dsj
 # Miscellaneous
 .DS_Store
 Thumbs.db
+# Local HMDA datasets
+data/raw/*.csv
+data/processed/*.parquet
