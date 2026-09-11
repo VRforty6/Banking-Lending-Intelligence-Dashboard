@@ -1,0 +1,2 @@
+-- This file is intentionally left blank.
+-- Data loading is performed by the Python script: load_data.py
