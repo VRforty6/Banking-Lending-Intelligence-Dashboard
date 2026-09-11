@@ -5,10 +5,10 @@ SELECT
     COUNT(*) AS total_applications,
     SUM(f.loan_amount) AS total_loan_amount,
     AVG(f.loan_amount) AS average_loan_amount,
-    MEDIAN(f.loan_amount) AS median_loan_amount,
+    PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY f.loan_amount) AS median_loan_amount,
     SUM(f.income) AS total_income,
     AVG(f.income) AS average_income,
-    MEDIAN(f.income) AS median_income
+    PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY f.income) AS median_income
 FROM analytics.fact_loan_application f
 GROUP BY f.application_year
 ORDER BY f.application_year;
@@ -50,7 +50,7 @@ SELECT
     d.applicant_credit_score_type,
     COUNT(*) AS applicant_count,
     AVG(f.income) AS average_income,
-    MEDIAN(f.income) AS median_income
+    PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY f.income) AS median_income
 FROM analytics.fact_loan_application f
 JOIN analytics.dim_applicant_profile d ON f.applicant_profile_key = d.applicant_profile_key
 GROUP BY
