@@ -1,0 +1,24 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "chartDecisionOutcomes",
+  "position": { "x": 360, "y": 210, "z": 2200, "height": 340, "width": 500, "tabOrder": 2200 },
+  "visual": {
+    "visualType": "clusteredColumnChart",
+    "query": {
+      "queryState": {
+        "Category": { "projections": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics dim_action_taken" } }, "Property": "Action Taken Short Label" } }, "queryRef": "analytics dim_action_taken.Action Taken Short Label", "nativeQueryRef": "Decision outcome" } ] },
+        "Y": { "projections": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Application Volume" } }, "queryRef": "analytics fact_loan_application.Application Volume", "nativeQueryRef": "Applications" } ] }
+      },
+      "sortDefinition": { "sort": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Application Volume" } }, "direction": "Descending" } ], "isDefaultSort": true }
+    },
+    "visualContainerObjects": {
+      "title": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Applications by decision outcome'" } } } } } ],
+      "subTitle": [ { "properties": { "show": { "expr": { "Literal": { "Value": "false" } } } } } ]
+    },
+    "drillFilterOtherVisuals": true,
+    "objects": {
+      "valueAxis": [ { "properties": { "labelDisplayUnits": { "expr": { "Literal": { "Value": "1000D" } } }, "labelPrecision": { "expr": { "Literal": { "Value": "0L" } } } } } ],
+      "labels": [ { "properties": { "labelDisplayUnits": { "expr": { "Literal": { "Value": "1000D" } } }, "labelPrecision": { "expr": { "Literal": { "Value": "0L" } } } } } ]
+    }
+  }
+}

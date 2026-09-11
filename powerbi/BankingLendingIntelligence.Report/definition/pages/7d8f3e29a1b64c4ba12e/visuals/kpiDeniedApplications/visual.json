@@ -1,0 +1,15 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "kpiDeniedApplications",
+  "position": { "x": 976, "y": 40, "z": 2102, "height": 130, "width": 284, "tabOrder": 2102 },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": { "queryState": { "Data": { "projections": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Denied Applications" } }, "queryRef": "analytics fact_loan_application.Denied Applications", "nativeQueryRef": "Denied Applications" } ] } } },
+    "visualContainerObjects": {
+      "title": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Denied applications'" } } } } } ],
+      "subTitle": [ { "properties": { "show": { "expr": { "Literal": { "Value": "false" } } } } } ]
+    },
+    "drillFilterOtherVisuals": true,
+    "objects": { "categoryLabels": [ { "properties": { "show": { "expr": { "Literal": { "Value": "false" } } } } } ] }
+  }
+}

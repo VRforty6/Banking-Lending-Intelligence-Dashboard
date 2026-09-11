@@ -114,6 +114,13 @@ table 'analytics dim_applicant_profile'
 
 		annotation SummarizationSetBy = Automatic
 
+	column 'Applicant Race Label' = SWITCH('analytics dim_applicant_profile'[applicant_race_1], "1", "American Indian or Alaska Native", "2", "Asian", "3", "Black or African American", "4", "Native Hawaiian or Pacific Islander", "5", "White", "6", "Information not provided", "7", "Not applicable", "Unknown")
+		dataType: string
+		lineageTag: 8c707fa5-9fd6-4fca-a929-af19d7913571
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
 	column applicant_race_2
 		dataType: string
 		lineageTag: 15264d4a-c547-4823-b745-b2fa9c80d0e5
@@ -199,6 +206,13 @@ table 'analytics dim_applicant_profile'
 		lineageTag: 2f462780-843b-4a60-9129-76d0b81c4ec2
 		summarizeBy: none
 		sourceColumn: applicant_sex
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Applicant Sex Label' = SWITCH('analytics dim_applicant_profile'[applicant_sex], "1", "Male", "2", "Female", "3", "Information not provided", "4", "Not applicable", "6", "Both selected", "Unknown")
+		dataType: string
+		lineageTag: c0041051-1655-4a53-a0bd-b0686001a6de
+		summarizeBy: none
 
 		annotation SummarizationSetBy = Automatic
 

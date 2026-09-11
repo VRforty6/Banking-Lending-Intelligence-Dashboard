@@ -26,6 +26,13 @@ table 'analytics dim_action_taken'
 
 		annotation SummarizationSetBy = Automatic
 
+	column 'Action Taken Short Label' = SWITCH('analytics dim_action_taken'[action_taken], 1, "Originated", 2, "Approved not accepted", 3, "Denied", 4, "Withdrawn", 5, "Incomplete", 6, "Purchased", 7, "Preapproval denied", 8, "Preapproval approved", "Unknown")
+		dataType: string
+		lineageTag: 976d3e13-4d73-43f3-beb9-4f1d8dd92fd9
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
 	partition 'analytics dim_action_taken' = m
 		mode: import
 		source =

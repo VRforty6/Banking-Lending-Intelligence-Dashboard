@@ -75,6 +75,42 @@ table 'analytics fact_loan_application'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
+	column 'Applicant Income Band' = ```
+			SWITCH(
+			    TRUE(),
+			    ISBLANK('analytics fact_loan_application'[income]), "Income not reported",
+			    'analytics fact_loan_application'[income] < 50, "Under $50K",
+			    'analytics fact_loan_application'[income] < 100, "$50K-$99K",
+			    'analytics fact_loan_application'[income] < 150, "$100K-$149K",
+			    'analytics fact_loan_application'[income] < 250, "$150K-$249K",
+			    "$250K+"
+			)
+			```
+		dataType: string
+		sortByColumn: 'Applicant Income Band Sort'
+		lineageTag: 2ab96e78-a704-4ccb-8d34-4d7a3cadf977
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Applicant Income Band Sort' = ```
+			SWITCH(
+			    TRUE(),
+			    ISBLANK('analytics fact_loan_application'[income]), 99,
+			    'analytics fact_loan_application'[income] < 50, 1,
+			    'analytics fact_loan_application'[income] < 100, 2,
+			    'analytics fact_loan_application'[income] < 150, 3,
+			    'analytics fact_loan_application'[income] < 250, 4,
+			    5
+			)
+			```
+		dataType: int64
+		formatString: 0
+		lineageTag: 38bb1d17-0cf9-4a52-a051-18cf5ffc162d
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
 	column application_year
 		dataType: int64
 		formatString: 0
@@ -123,7 +159,7 @@ table 'analytics fact_loan_application'
 		lineageTag: 0f601f3b-d1f2-4a1d-a7a1-e2c776cddbb9
 
 	measure 'Originated Applications' =
-			
+
 			CALCULATE(
 			    [Application Volume],
 			    'analytics dim_action_taken'[action_taken] = 1
@@ -132,8 +168,18 @@ table 'analytics fact_loan_application'
 		displayFolder: Executive Overview
 		lineageTag: 171bbce0-e379-48f9-9f19-33f9e9fcb744
 
+	measure 'Approved Not Accepted Applications' =
+
+			CALCULATE(
+			    [Application Volume],
+			    'analytics dim_action_taken'[action_taken] = 2
+			)
+		formatString: #,0
+		displayFolder: Approval & Denial Analysis
+		lineageTag: b6fd1c73-b2ce-4264-91d8-8d51a78b38d3
+
 	measure 'Denied Applications' =
-			
+
 			CALCULATE(
 			    [Application Volume],
 			    'analytics dim_action_taken'[action_taken] = 3
@@ -143,7 +189,7 @@ table 'analytics fact_loan_application'
 		lineageTag: c5a390f8-1024-44b8-909a-a6dfe9215d2a
 
 	measure 'Withdrawn Applications' =
-			
+
 			CALCULATE(
 			    [Application Volume],
 			    'analytics dim_action_taken'[action_taken] = 4
@@ -153,7 +199,7 @@ table 'analytics fact_loan_application'
 		lineageTag: d20999e1-65d4-4462-aab0-218c1f9b46af
 
 	measure 'Incomplete Applications' =
-			
+
 			CALCULATE(
 			    [Application Volume],
 			    'analytics dim_action_taken'[action_taken] = 5
@@ -163,7 +209,7 @@ table 'analytics fact_loan_application'
 		lineageTag: 197f449c-e6bd-4d78-a61e-061562f67a41
 
 	measure 'Purchased Loans' =
-			
+
 			CALCULATE(
 			    [Application Volume],
 			    'analytics dim_action_taken'[action_taken] = 6
@@ -198,7 +244,7 @@ table 'analytics fact_loan_application'
 		lineageTag: b6e96d4c-f224-42b4-a2f3-6cf0672be6d7
 
 	measure 'Average Originated Loan Amount' =
-			
+
 			CALCULATE(
 			    AVERAGE('analytics fact_loan_application'[loan_amount]),
 			    'analytics dim_action_taken'[action_taken] = 1
