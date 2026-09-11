@@ -3,7 +3,152 @@ import numpy as np
 from pathlib import Path
 import pyarrow as pa
 import pyarrow.parquet as pq
-from typing import Union, Tuple, Dict, Any
+import re
+from collections import defaultdict
+from dataclasses import dataclass
+from typing import Union, Tuple, Dict, Any, List, Optional
+
+from src import config
+
+
+HMDA_FILE_RE = re.compile(r"^hmda_(?P<year>\d{4})_(?P<state>[A-Za-z]{2})\.csv$")
+NA_VALUES = ["", "NA", "N/A", "Exempt", "nan", "<NA>"]
+
+
+@dataclass(frozen=True)
+class HmdaSourceFile:
+    path: Path
+    year: int
+    state: str
+
+
+def parse_hmda_filename(path: Union[str, Path]) -> Optional[HmdaSourceFile]:
+    """Parse hmda_<YEAR>_<STATE>.csv names, returning None for other names."""
+    path = Path(path)
+    match = HMDA_FILE_RE.match(path.name)
+    if not match:
+        return None
+    return HmdaSourceFile(
+        path=path,
+        year=int(match.group("year")),
+        state=match.group("state").upper(),
+    )
+
+
+def discover_hmda_files(
+    raw_dir: Union[str, Path],
+    valid_years: set[int] = config.VALID_YEARS,
+    supported_states: set[str] = config.SUPPORTED_STATES,
+) -> List[HmdaSourceFile]:
+    """
+    Discover supported HMDA raw CSVs using hmda_<YEAR>_<STATE>.csv names.
+
+    Files that follow the naming convention but fall outside the supported scope
+    fail clearly so an operator does not accidentally skip a state-year extract.
+    """
+    raw_dir = Path(raw_dir)
+    if not raw_dir.exists():
+        raise FileNotFoundError(f"Raw data directory not found: {raw_dir}")
+
+    discovered: list[HmdaSourceFile] = []
+    unsupported: list[str] = []
+    for path in sorted(raw_dir.glob(config.RAW_FILE_PATTERN)):
+        source = parse_hmda_filename(path)
+        if source is None:
+            continue
+        if source.year not in valid_years or source.state not in supported_states:
+            unsupported.append(path.name)
+            continue
+        discovered.append(source)
+
+    if unsupported:
+        raise ValueError(
+            "Unsupported HMDA raw file(s): "
+            + ", ".join(unsupported)
+            + f". Supported years: {sorted(valid_years)}; "
+            + f"supported states: {sorted(supported_states)}"
+        )
+
+    if not discovered:
+        raise FileNotFoundError(
+            f"No supported HMDA CSV files found in {raw_dir} using "
+            "hmda_<YEAR>_<STATE>.csv"
+        )
+
+    return discovered
+
+
+def _empty_count_bucket() -> Dict[str, int]:
+    return {"total_rows": 0, "valid_rows": 0, "rejected_rows": 0}
+
+
+def _update_bucket(bucket: Dict[str, int], total: int, valid: int, rejected: int) -> None:
+    bucket["total_rows"] += total
+    bucket["valid_rows"] += valid
+    bucket["rejected_rows"] += rejected
+
+
+def validate_source_metadata(
+    df: pd.DataFrame,
+    source: HmdaSourceFile,
+    chunk_num: int,
+) -> None:
+    """
+    Ensure activity_year and state_code agree with the source filename.
+
+    The ETL fails fast on mismatches rather than rewriting source values or
+    blending a mislabeled file into the consolidated Parquet output.
+    """
+    required_columns = ["activity_year", "state_code"]
+    missing_columns = [column for column in required_columns if column not in df.columns]
+    if missing_columns:
+        raise ValueError(
+            f"{source.path.name} is missing required metadata column(s): "
+            f"{', '.join(missing_columns)}"
+        )
+
+    year_values = pd.to_numeric(df["activity_year"], errors="coerce")
+    bad_year_mask = year_values.isna() | (year_values != source.year)
+    if bad_year_mask.any():
+        sample = (
+            df.loc[bad_year_mask, "activity_year"]
+            .astype("string")
+            .drop_duplicates()
+            .head(5)
+            .tolist()
+        )
+        raise ValueError(
+            f"{source.path.name} chunk {chunk_num} has activity_year values "
+            f"that do not match filename year {source.year}: {sample}"
+        )
+
+    state_values = df["state_code"].astype("string").str.strip().str.upper()
+    bad_state_mask = state_values.isna() | (state_values != source.state)
+    if bad_state_mask.any():
+        sample = (
+            df.loc[bad_state_mask, "state_code"]
+            .astype("string")
+            .drop_duplicates()
+            .head(5)
+            .tolist()
+        )
+        raise ValueError(
+            f"{source.path.name} chunk {chunk_num} has state_code values "
+            f"that do not match filename state {source.state}: {sample}"
+        )
+
+
+def _ensure_schema_compatible(
+    table: pa.Table,
+    writer: pq.ParquetWriter,
+    dataset_name: str,
+) -> pa.Table:
+    if table.schema.names != writer.schema.names:
+        raise ValueError(
+            f"{dataset_name} schema mismatch. Expected columns "
+            f"{writer.schema.names}, received {table.schema.names}"
+        )
+    return table.cast(writer.schema, safe=False)
 
 
 def clean_chunk(df: pd.DataFrame) -> pd.DataFrame:
@@ -125,12 +270,12 @@ def etl_hmda(
     input_path: Union[str, Path],
     output_dir: Union[str, Path],
     chunksize: int = 100_000
-) -> Dict[str, int]:
+) -> Dict[str, Any]:
     """
     Execute the HMDA ETL pipeline.
 
     Args:
-        input_path: Path to the input CSV file
+        input_path: Path to an input CSV file or a raw data directory
         output_dir: Directory where output files will be written
         chunksize: Number of rows to process at a time
 
@@ -142,9 +287,28 @@ def etl_hmda(
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Define output paths
-    clean_path = output_dir / 'hmda_clean.parquet'
-    rejected_path = output_dir / 'hmda_rejected.parquet'
-    report_path = output_dir / 'validation_report.txt'
+    clean_path = output_dir / config.CLEANED_FILE_NAME
+    rejected_path = output_dir / config.REJECTED_FILE_NAME
+    report_path = output_dir / config.REPORT_FILE_NAME
+
+    for output_path in [clean_path, rejected_path, report_path]:
+        if output_path.exists():
+            output_path.unlink()
+
+    if input_path.is_dir():
+        sources = [(source.path, source) for source in discover_hmda_files(input_path)]
+    elif input_path.is_file():
+        source = parse_hmda_filename(input_path)
+        if source is not None:
+            if source.year not in config.VALID_YEARS or source.state not in config.SUPPORTED_STATES:
+                raise ValueError(
+                    f"Unsupported HMDA raw file: {input_path.name}. "
+                    f"Supported years: {sorted(config.VALID_YEARS)}; "
+                    f"supported states: {sorted(config.SUPPORTED_STATES)}"
+                )
+        sources = [(input_path, source)]
+    else:
+        raise FileNotFoundError(f"Input path not found: {input_path}")
 
     # Initialize counters for overall reconciliation
     total_rows = 0
@@ -156,67 +320,96 @@ def etl_hmda(
         'invalid_action_taken': 0,
         'invalid_loan_amount': 0
     }
+    counts_by_source_file: dict[str, dict[str, int]] = defaultdict(_empty_count_bucket)
+    counts_by_year: dict[int, dict[str, int]] = defaultdict(_empty_count_bucket)
+    counts_by_state: dict[str, dict[str, int]] = defaultdict(_empty_count_bucket)
 
     # Initialize Parquet writers (will be set on first chunk)
     clean_writer = None
     rejected_writer = None
 
     try:
-        # Read CSV in chunks
-        # Read all columns as string to prevent per-chunk dtype inference
-        for chunk_num, chunk in enumerate(
-            pd.read_csv(
-                input_path,
-                chunksize=chunksize,
-                low_memory=False,
-                keep_default_na=True,
-                na_values=["", "NA", "N/A", "Exempt", "nan", "<NA>"],
-                dtype="string"
-            )
-        ):
-            total_rows += len(chunk)
-
-            # Clean the chunk
-            cleaned_chunk = clean_chunk(chunk)
-
-            # Validate the chunk
-            valid_chunk, rejected_chunk, chunk_counts = validate_chunk(cleaned_chunk)
-
-            # Update counters
-            valid_rows += len(valid_chunk)
-            rejected_rows += len(rejected_chunk)
-            for key in reason_counts:
-                reason_counts[key] += chunk_counts.get(key, 0)
-
-            # Write valid chunk to Parquet
-            if len(valid_chunk) > 0:
-                table = pa.Table.from_pandas(
-                    valid_chunk.reset_index(drop=True), preserve_index=False
+        for source_path, source_metadata in sources:
+            # Read CSV in chunks. Read all columns as string to prevent
+            # per-chunk dtype inference and keep RAM bounded.
+            for chunk_num, chunk in enumerate(
+                pd.read_csv(
+                    source_path,
+                    chunksize=chunksize,
+                    low_memory=False,
+                    keep_default_na=True,
+                    na_values=NA_VALUES,
+                    dtype="string"
                 )
-                if clean_writer is None:
-                    # Initialize writer with schema from first chunk
-                    clean_writer = pq.ParquetWriter(
-                        clean_path, table.schema, compression='snappy'
-                    )
-                else:
-                    # Cast the table to the writer's schema
-                    table = table.cast(clean_writer.schema, safe=False)
-                clean_writer.write_table(table)
+            , start=1):
+                input_count = len(chunk)
+                total_rows += input_count
 
-            # Write rejected chunk to Parquet
-            if len(rejected_chunk) > 0:
-                table = pa.Table.from_pandas(
-                    rejected_chunk.reset_index(drop=True), preserve_index=False
+                # Clean the chunk
+                cleaned_chunk = clean_chunk(chunk)
+
+                if source_metadata is not None:
+                    validate_source_metadata(cleaned_chunk, source_metadata, chunk_num)
+
+                # Validate the chunk
+                valid_chunk, rejected_chunk, chunk_counts = validate_chunk(cleaned_chunk)
+
+                valid_count = len(valid_chunk)
+                rejected_count = len(rejected_chunk)
+
+                # Update counters
+                valid_rows += valid_count
+                rejected_rows += rejected_count
+                for key in reason_counts:
+                    reason_counts[key] += int(chunk_counts.get(key, 0))
+
+                _update_bucket(
+                    counts_by_source_file[source_path.name],
+                    input_count,
+                    valid_count,
+                    rejected_count,
                 )
-                if rejected_writer is None:
-                    # Initialize writer with schema from first chunk
-                    rejected_writer = pq.ParquetWriter(
-                        rejected_path, table.schema, compression='snappy'
+                if source_metadata is not None:
+                    _update_bucket(
+                        counts_by_year[source_metadata.year],
+                        input_count,
+                        valid_count,
+                        rejected_count,
                     )
-                else:
-                    # Cast the table to the writer's schema
-                    table = table.cast(rejected_writer.schema, safe=False)
-                rejected_writer.write_table(table)
+                    _update_bucket(
+                        counts_by_state[source_metadata.state],
+                        input_count,
+                        valid_count,
+                        rejected_count,
+                    )
+
+                # Write valid chunk to Parquet
+                if valid_count > 0:
+                    table = pa.Table.from_pandas(
+                        valid_chunk.reset_index(drop=True), preserve_index=False
+                    )
+                    if clean_writer is None:
+                        clean_writer = pq.ParquetWriter(
+                            clean_path, table.schema, compression='snappy'
+                        )
+                    else:
+                        table = _ensure_schema_compatible(table, clean_writer, "clean")
+                    clean_writer.write_table(table)
+
+                # Write rejected chunk to Parquet
+                if rejected_count > 0:
+                    table = pa.Table.from_pandas(
+                        rejected_chunk.reset_index(drop=True), preserve_index=False
+                    )
+                    if rejected_writer is None:
+                        rejected_writer = pq.ParquetWriter(
+                            rejected_path, table.schema, compression='snappy'
+                        )
+                    else:
+                        table = _ensure_schema_compatible(
+                            table, rejected_writer, "rejected"
+                        )
+                    rejected_writer.write_table(table)
 
     finally:
         # Ensure writers are closed
@@ -248,6 +441,27 @@ def etl_hmda(
            f"Failed action_taken (invalid): "
            f"{reason_counts['invalid_action_taken']}\n"
         )
+       f.write("\nCounts by source file:\n")
+       for file_name in sorted(counts_by_source_file):
+           counts = counts_by_source_file[file_name]
+           f.write(
+               f"  {file_name}: total={counts['total_rows']}, "
+               f"valid={counts['valid_rows']}, rejected={counts['rejected_rows']}\n"
+           )
+       f.write("\nCounts by year:\n")
+       for year in sorted(counts_by_year):
+           counts = counts_by_year[year]
+           f.write(
+               f"  {year}: total={counts['total_rows']}, "
+               f"valid={counts['valid_rows']}, rejected={counts['rejected_rows']}\n"
+           )
+       f.write("\nCounts by state:\n")
+       for state in sorted(counts_by_state):
+           counts = counts_by_state[state]
+           f.write(
+               f"  {state}: total={counts['total_rows']}, "
+               f"valid={counts['valid_rows']}, rejected={counts['rejected_rows']}\n"
+           )
     # Return reconciliation counts
     return {
         'total_rows_processed': total_rows,
@@ -257,17 +471,20 @@ def etl_hmda(
         'failed_activity_year': reason_counts['missing_activity_year'],
         'failed_lei': reason_counts['missing_lei'],
         'failed_loan_amount': reason_counts['invalid_loan_amount'],
-        'failed_action_taken': reason_counts['invalid_action_taken']
+        'failed_action_taken': reason_counts['invalid_action_taken'],
+        'counts_by_source_file': dict(counts_by_source_file),
+        'counts_by_year': dict(counts_by_year),
+        'counts_by_state': dict(counts_by_state)
     }
 
 
 if __name__ == "__main__":
     # Default paths
-    input_path = Path('data/raw/state_CA.csv')
-    output_dir = Path('data/processed')
+    input_path = config.RAW_DATA_DIR
+    output_dir = config.PROCESSED_DATA_DIR
 
     # Run the ETL
-    result = etl_hmda(input_path, output_dir)
+    result = etl_hmda(input_path, output_dir, chunksize=config.CHUNK_SIZE)
 
     # Print summary
     print("HMDA ETL completed successfully.")

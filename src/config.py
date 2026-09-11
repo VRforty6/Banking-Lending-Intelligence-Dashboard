@@ -17,16 +17,15 @@ RAW_DATA_DIR.mkdir(parents=True, exist_ok=True)
 PROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)
 LOOKUP_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-# Input file name
-INPUT_FILE_NAME = "state_CA.csv"
-INPUT_FILE_PATH = RAW_DATA_DIR / INPUT_FILE_NAME
+# Raw HMDA files are discovered from data/raw using this convention:
+# hmda_<YEAR>_<STATE>.csv, for example hmda_2025_CA.csv.
+RAW_FILE_PATTERN = "hmda_*_*.csv"
 
-# Output file names (we'll write in Parquet for efficiency, but also CSV if needed)
-# We'll output cleaned data as Parquet
-CLEANED_FILE_NAME = "cleaned_data.parquet"
+# Output file names used by the production pipeline and load_data.py.
+CLEANED_FILE_NAME = "hmda_clean.parquet"
 CLEANED_FILE_PATH = PROCESSED_DATA_DIR / CLEANED_FILE_NAME
 
-REJECTED_FILE_NAME = "rejected_data.parquet"
+REJECTED_FILE_NAME = "hmda_rejected.parquet"
 REJECTED_FILE_PATH = PROCESSED_DATA_DIR / REJECTED_FILE_NAME
 
 # We'll also output a summary report
@@ -36,8 +35,9 @@ REPORT_FILE_PATH = PROCESSED_DATA_DIR / REPORT_FILE_NAME
 # HMDA specific constants
 HMDA_NA_STRING = "NA"  # string used for missing values in the raw data
 
-# Valid years for activity_year (can be extended)
-VALID_YEARS = {2025}
+# Supported HMDA extracts for the current ingestion scope.
+SUPPORTED_STATES = {"CA", "TX", "FL", "NY", "IL"}
+VALID_YEARS = {2023, 2024, 2025}
 
 # Batch size for chunked reading (if we decide to chunk)
 CHUNK_SIZE = 100_000  # rows per chunk

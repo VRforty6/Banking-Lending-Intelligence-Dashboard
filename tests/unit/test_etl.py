@@ -1,8 +1,14 @@
 import os
 
 import pandas as pd
+import pytest
 
-from etl_hmda import clean_chunk, etl_hmda, validate_chunk
+from etl_hmda import (
+    clean_chunk,
+    discover_hmda_files,
+    etl_hmda,
+    validate_chunk,
+)
 
 
 NA_VALUES = ["", "NA", "N/A", "Exempt", "nan", "<NA>"]
@@ -179,6 +185,13 @@ def test_validation_report(tmp_path):
         "Failed lei (missing): 2",
         "Failed loan_amount (invalid): 2",
         "Failed action_taken (invalid): 0",
+        "",
+        "Counts by source file:",
+        "  input.csv: total=8, valid=4, rejected=4",
+        "",
+        "Counts by year:",
+        "",
+        "Counts by state:",
     ]
 
     assert result["total_rows_processed"] == 8
@@ -255,3 +268,140 @@ def test_applicant_race_1_dtype_mismatch_regression(tmp_path):
     assert df.iloc[1]["applicant_race-1"] == "2"
     assert df.iloc[2]["applicant_race-1"] == "1"
     assert pd.isna(df.iloc[3]["applicant_race-1"])
+
+
+def test_multi_file_discovery_supported_scope(tmp_path):
+    """Discover only supported HMDA state-year extracts."""
+    raw_dir = tmp_path / "raw"
+    raw_dir.mkdir()
+    for file_name in [
+        "hmda_2023_CA.csv",
+        "hmda_2024_TX.csv",
+        "hmda_2025_FL.csv",
+        "notes.csv",
+    ]:
+        (raw_dir / file_name).write_text("activity_year,state_code\n", encoding="utf-8")
+
+    discovered = discover_hmda_files(raw_dir)
+
+    assert [source.path.name for source in discovered] == [
+        "hmda_2023_CA.csv",
+        "hmda_2024_TX.csv",
+        "hmda_2025_FL.csv",
+    ]
+    assert [(source.year, source.state) for source in discovered] == [
+        (2023, "CA"),
+        (2024, "TX"),
+        (2025, "FL"),
+    ]
+
+
+def test_discovery_fails_for_unsupported_state_year_file(tmp_path):
+    """Do not silently ignore convention-matching files outside supported scope."""
+    raw_dir = tmp_path / "raw"
+    raw_dir.mkdir()
+    (raw_dir / "hmda_2022_CA.csv").write_text(
+        "activity_year,state_code\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="Unsupported HMDA raw file"):
+        discover_hmda_files(raw_dir)
+
+
+def test_multi_file_consolidation_and_reconciliation(tmp_path):
+    """Append supported files into one clean and one rejected Parquet dataset."""
+    raw_dir = tmp_path / "raw"
+    output_dir = tmp_path / "processed"
+    raw_dir.mkdir()
+
+    (raw_dir / "hmda_2023_CA.csv").write_text(
+        "activity_year,state_code,action_taken,loan_amount,income,lei\n"
+        "2023,CA,1,100000,50,LEI-CA-1\n"
+        "2023,CA,3,0,60,LEI-CA-2\n",
+        encoding="utf-8",
+    )
+    (raw_dir / "hmda_2024_TX.csv").write_text(
+        "activity_year,state_code,action_taken,loan_amount,income,lei\n"
+        "2024,TX,1,200000,70,LEI-TX-1\n"
+        "2024,TX,9,300000,80,LEI-TX-2\n",
+        encoding="utf-8",
+    )
+
+    result = etl_hmda(raw_dir, output_dir, chunksize=1)
+
+    assert result["total_rows_processed"] == 4
+    assert result["valid_rows"] == 2
+    assert result["rejected_rows"] == 2
+    assert result["reconciliation_difference"] == 0
+    assert result["counts_by_source_file"] == {
+        "hmda_2023_CA.csv": {"total_rows": 2, "valid_rows": 1, "rejected_rows": 1},
+        "hmda_2024_TX.csv": {"total_rows": 2, "valid_rows": 1, "rejected_rows": 1},
+    }
+    assert result["counts_by_year"] == {
+        2023: {"total_rows": 2, "valid_rows": 1, "rejected_rows": 1},
+        2024: {"total_rows": 2, "valid_rows": 1, "rejected_rows": 1},
+    }
+    assert result["counts_by_state"] == {
+        "CA": {"total_rows": 2, "valid_rows": 1, "rejected_rows": 1},
+        "TX": {"total_rows": 2, "valid_rows": 1, "rejected_rows": 1},
+    }
+
+    clean_df = pd.read_parquet(output_dir / "hmda_clean.parquet")
+    rejected_df = pd.read_parquet(output_dir / "hmda_rejected.parquet")
+
+    assert len(clean_df) == 2
+    assert len(rejected_df) == 2
+    assert set(clean_df["activity_year"]) == {2023, 2024}
+    assert set(clean_df["state_code"]) == {"CA", "TX"}
+    assert "rejection_reason" not in clean_df.columns
+    assert "rejection_reason" in rejected_df.columns
+
+
+def test_filename_activity_year_mismatch_fails_clearly(tmp_path):
+    """Fail instead of rewriting mismatched activity_year values."""
+    raw_dir = tmp_path / "raw"
+    output_dir = tmp_path / "processed"
+    raw_dir.mkdir()
+    (raw_dir / "hmda_2025_NY.csv").write_text(
+        "activity_year,state_code,action_taken,loan_amount,income,lei\n"
+        "2024,NY,1,100000,50,LEI-NY-1\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="activity_year values"):
+        etl_hmda(raw_dir, output_dir, chunksize=1)
+
+
+def test_filename_state_mismatch_fails_clearly(tmp_path):
+    """Fail instead of rewriting mismatched state_code values."""
+    raw_dir = tmp_path / "raw"
+    output_dir = tmp_path / "processed"
+    raw_dir.mkdir()
+    (raw_dir / "hmda_2025_IL.csv").write_text(
+        "activity_year,state_code,action_taken,loan_amount,income,lei\n"
+        "2025,CA,1,100000,50,LEI-IL-1\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="state_code values"):
+        etl_hmda(raw_dir, output_dir, chunksize=1)
+
+
+def test_2023_2024_2025_are_valid_supported_years(tmp_path):
+    """Support the initial multi-year ingestion scope."""
+    raw_dir = tmp_path / "raw"
+    output_dir = tmp_path / "processed"
+    raw_dir.mkdir()
+    for year, state in [(2023, "CA"), (2024, "TX"), (2025, "FL")]:
+        (raw_dir / f"hmda_{year}_{state}.csv").write_text(
+            "activity_year,state_code,action_taken,loan_amount,income,lei\n"
+            f"{year},{state},1,100000,50,LEI-{state}-{year}\n",
+            encoding="utf-8",
+        )
+
+    result = etl_hmda(raw_dir, output_dir, chunksize=2)
+
+    assert result["valid_rows"] == 3
+    assert result["rejected_rows"] == 0
+    assert set(result["counts_by_year"]) == {2023, 2024, 2025}
