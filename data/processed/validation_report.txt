@@ -1,9 +1,20 @@
 HMDA ETL Validation Report
-Total rows processed: 1161292
-Valid rows: 1161292
+Total rows processed: 2305569
+Valid rows: 2305569
 Rejected rows: 0
 Reconciliation difference: 0
 Failed activity_year (missing): 0
 Failed lei (missing): 0
 Failed loan_amount (invalid): 0
 Failed action_taken (invalid): 0
+
+Counts by source file:
+  hmda_2025_CA.csv: total=1161292, valid=1161292, rejected=0
+  hmda_2025_TX.csv: total=1144277, valid=1144277, rejected=0
+
+Counts by year:
+  2025: total=2305569, valid=2305569, rejected=0
+
+Counts by state:
+  CA: total=1161292, valid=1161292, rejected=0
+  TX: total=1144277, valid=1144277, rejected=0
