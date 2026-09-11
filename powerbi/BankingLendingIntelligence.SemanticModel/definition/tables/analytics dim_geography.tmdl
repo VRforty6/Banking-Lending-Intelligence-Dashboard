@@ -1,0 +1,184 @@
+table 'analytics dim_geography'
+	lineageTag: fc82d805-54f7-4b5c-bff1-e8b9d03a93ca
+
+	column geography_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 48e223bb-76c8-4b35-8388-b1cb2ff4d55c
+		summarizeBy: none
+		sourceColumn: geography_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column state_code
+		dataType: string
+		lineageTag: 413c5414-0d77-4b88-ba75-bd266567117e
+		summarizeBy: none
+		sourceColumn: state_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column county_code
+		dataType: string
+		lineageTag: 607480d2-2bad-4a3e-bdc8-ec9ad5a6f6bf
+		summarizeBy: none
+		sourceColumn: county_code
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'County Name' = ```
+			SWITCH(
+			    'analytics dim_geography'[county_code],
+			    "06001", "Alameda County",
+			    "06003", "Alpine County",
+			    "06005", "Amador County",
+			    "06007", "Butte County",
+			    "06009", "Calaveras County",
+			    "06011", "Colusa County",
+			    "06013", "Contra Costa County",
+			    "06015", "Del Norte County",
+			    "06017", "El Dorado County",
+			    "06019", "Fresno County",
+			    "06021", "Glenn County",
+			    "06023", "Humboldt County",
+			    "06025", "Imperial County",
+			    "06027", "Inyo County",
+			    "06029", "Kern County",
+			    "06031", "Kings County",
+			    "06033", "Lake County",
+			    "06035", "Lassen County",
+			    "06037", "Los Angeles County",
+			    "06039", "Madera County",
+			    "06041", "Marin County",
+			    "06043", "Mariposa County",
+			    "06045", "Mendocino County",
+			    "06047", "Merced County",
+			    "06049", "Modoc County",
+			    "06051", "Mono County",
+			    "06053", "Monterey County",
+			    "06055", "Napa County",
+			    "06057", "Nevada County",
+			    "06059", "Orange County",
+			    "06061", "Placer County",
+			    "06063", "Plumas County",
+			    "06065", "Riverside County",
+			    "06067", "Sacramento County",
+			    "06069", "San Benito County",
+			    "06071", "San Bernardino County",
+			    "06073", "San Diego County",
+			    "06075", "San Francisco County",
+			    "06077", "San Joaquin County",
+			    "06079", "San Luis Obispo County",
+			    "06081", "San Mateo County",
+			    "06083", "Santa Barbara County",
+			    "06085", "Santa Clara County",
+			    "06087", "Santa Cruz County",
+			    "06089", "Shasta County",
+			    "06091", "Sierra County",
+			    "06093", "Siskiyou County",
+			    "06095", "Solano County",
+			    "06097", "Sonoma County",
+			    "06099", "Stanislaus County",
+			    "06101", "Sutter County",
+			    "06103", "Tehama County",
+			    "06105", "Trinity County",
+			    "06107", "Tulare County",
+			    "06109", "Tuolumne County",
+			    "06111", "Ventura County",
+			    "06113", "Yolo County",
+			    "06115", "Yuba County",
+			    "UNKNOWN", "Unknown county",
+			    "Unmapped county"
+			)
+			```
+		dataType: string
+		lineageTag: edcd709b-49cc-4ba9-9d87-43f764e9359d
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column census_tract
+		dataType: string
+		lineageTag: d65dc5ff-00d5-4669-8239-f03d32610e2e
+		summarizeBy: none
+		sourceColumn: census_tract
+
+		annotation SummarizationSetBy = Automatic
+
+	column tract_population
+		dataType: int64
+		formatString: 0
+		lineageTag: 4b8590a0-6d9e-4c18-8b2e-dfa59db622c1
+		summarizeBy: none
+		sourceColumn: tract_population
+
+		annotation SummarizationSetBy = Automatic
+
+	column tract_minority_population_percent
+		dataType: double
+		lineageTag: 1dc6cd9d-8b76-40b7-863a-056cfa2733d1
+		summarizeBy: none
+		sourceColumn: tract_minority_population_percent
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column ffiec_msa_md_median_family_income
+		dataType: double
+		lineageTag: cb522c12-fb9d-4525-bfcc-4d10489a3463
+		summarizeBy: none
+		sourceColumn: ffiec_msa_md_median_family_income
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column tract_to_msa_income_percentage
+		dataType: double
+		lineageTag: 5714547e-0974-446d-86d8-04bc2e8313e5
+		summarizeBy: none
+		sourceColumn: tract_to_msa_income_percentage
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column tract_owner_occupied_units
+		dataType: int64
+		formatString: 0
+		lineageTag: 07462d70-dd2a-4cea-81fb-cc733bc206c1
+		summarizeBy: none
+		sourceColumn: tract_owner_occupied_units
+
+		annotation SummarizationSetBy = Automatic
+
+	column tract_one_to_four_family_homes
+		dataType: int64
+		formatString: 0
+		lineageTag: 0e96f315-79e8-4a93-b8e8-219a8c8fa185
+		summarizeBy: none
+		sourceColumn: tract_one_to_four_family_homes
+
+		annotation SummarizationSetBy = Automatic
+
+	column tract_median_age_of_housing_units
+		dataType: int64
+		formatString: 0
+		lineageTag: c299f3c4-f3ec-4560-819b-35589eaa6004
+		summarizeBy: none
+		sourceColumn: tract_median_age_of_housing_units
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'analytics dim_geography' = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost", "banking_lending_intelligence"),
+				    analytics_dim_geography = Source{[Schema="analytics",Item="dim_geography"]}[Data]
+				in
+				    analytics_dim_geography
+
+	annotation PBI_ResultType = Table
+

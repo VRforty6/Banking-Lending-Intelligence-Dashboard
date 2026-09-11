@@ -1,0 +1,86 @@
+table 'analytics dim_loan'
+	lineageTag: 469f7a2a-29f4-4d43-af23-ebebdff9db18
+
+	column loan_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 2abc5a16-41a9-4ef3-bace-f4ba3f565f95
+		summarizeBy: none
+		sourceColumn: loan_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column loan_type
+		dataType: string
+		lineageTag: dbb01d40-5694-4216-bc41-3857666d3783
+		summarizeBy: none
+		sourceColumn: loan_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column loan_purpose
+		dataType: string
+		lineageTag: b22b52a5-14ae-49ac-9fc3-16660c979155
+		summarizeBy: none
+		sourceColumn: loan_purpose
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Loan Purpose Label' = SWITCH('analytics dim_loan'[loan_purpose], "1", "Home purchase", "2", "Home improvement", "31", "Refinancing", "32", "Cash-out refinancing", "4", "Other purpose", "5", "Not applicable", "Unknown")
+		dataType: string
+		lineageTag: 7be204f6-5fbd-47f0-bb1b-f79344637dc0
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column lien_status
+		dataType: string
+		lineageTag: 852d7b47-5d67-45b0-8fb8-ce76af8562a8
+		summarizeBy: none
+		sourceColumn: lien_status
+
+		annotation SummarizationSetBy = Automatic
+
+	column reverse_mortgage
+		dataType: string
+		lineageTag: d886a4f9-405e-4790-a7ea-ebd8dd6466ed
+		summarizeBy: none
+		sourceColumn: reverse_mortgage
+
+		annotation SummarizationSetBy = Automatic
+
+	column open_end_line_of_credit
+		dataType: string
+		lineageTag: 71710e7a-ba41-4edc-be5b-e4b4b9de14c8
+		summarizeBy: none
+		sourceColumn: open_end_line_of_credit
+
+		annotation SummarizationSetBy = Automatic
+
+	column business_or_commercial_purpose
+		dataType: string
+		lineageTag: 191ade49-2910-45d3-9e56-083ad07fe0d9
+		summarizeBy: none
+		sourceColumn: business_or_commercial_purpose
+
+		annotation SummarizationSetBy = Automatic
+
+	column conforming_loan_limit
+		dataType: string
+		lineageTag: e68c0aec-6e58-4423-bf42-d163a618fae2
+		summarizeBy: none
+		sourceColumn: conforming_loan_limit
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'analytics dim_loan' = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost", "banking_lending_intelligence"),
+				    analytics_dim_loan = Source{[Schema="analytics",Item="dim_loan"]}[Data]
+				in
+				    analytics_dim_loan
+
+	annotation PBI_ResultType = Table
+

@@ -93,6 +93,13 @@ AutoRefreshInfo
 DataSourceMetadata.xml
 LayoutResourceMeasureInformation.dsj
 *AutoNumberChange.txt
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
+**/.pbi/unappliedChanges.json
+**/.pbi/mashup.cache
+**/.pbi/cache/
+**/.pbi/temp/
+**/.pbi/tmp/
 
 # Miscellaneous
 .DS_Store

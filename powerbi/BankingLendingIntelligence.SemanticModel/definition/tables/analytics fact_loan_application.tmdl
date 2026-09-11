@@ -1,0 +1,240 @@
+table 'analytics fact_loan_application'
+	lineageTag: 1d0fba4b-4045-4238-b786-bde9044a118d
+
+	column fact_loan_application_key
+		dataType: int64
+		formatString: 0
+		lineageTag: cd75ebd0-9f53-454f-990f-51b9228d7344
+		summarizeBy: sum
+		sourceColumn: fact_loan_application_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column lei_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 8eeea9bd-129a-4bcb-9f21-ab6b33f5b5fa
+		summarizeBy: none
+		sourceColumn: lei_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column geography_key
+		dataType: int64
+		formatString: 0
+		lineageTag: ec676fed-03fc-4463-8861-eaaaa865b0dc
+		summarizeBy: none
+		sourceColumn: geography_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column loan_key
+		dataType: int64
+		formatString: 0
+		lineageTag: a58ce25e-71b9-491a-b74e-fc83f067f4d5
+		summarizeBy: none
+		sourceColumn: loan_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column applicant_profile_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 5704ba32-f0b4-4417-9138-609067b63a0c
+		summarizeBy: none
+		sourceColumn: applicant_profile_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column action_taken_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 7a2f251b-b2fd-4be3-94e2-f82afd18c4d0
+		summarizeBy: none
+		sourceColumn: action_taken_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column loan_amount
+		dataType: double
+		lineageTag: 5cff429d-6255-48ca-8803-50414aadda79
+		summarizeBy: sum
+		sourceColumn: loan_amount
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column income
+		dataType: double
+		lineageTag: d50df9d6-54d6-4e6a-b3e6-fcfd62e1ec31
+		summarizeBy: sum
+		sourceColumn: income
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column application_year
+		dataType: int64
+		formatString: 0
+		lineageTag: e773bdfb-0be6-4fe1-b6db-2425ffca6202
+		summarizeBy: sum
+		sourceColumn: application_year
+
+		annotation SummarizationSetBy = Automatic
+
+	column load_timestamp
+		dataType: dateTime
+		formatString: General Date
+		lineageTag: f84d7a98-7dab-4a9a-ad70-dc7535d31ec9
+		summarizeBy: none
+		sourceColumn: load_timestamp
+
+		variation Variation
+			isDefault
+			relationship: c939ffd6-33aa-4e0e-a81d-7909ea6ea579
+			defaultHierarchy: LocalDateTable_a8989b91-22e1-4e6a-8cfc-a8ae71527b35.'Date Hierarchy'
+
+		annotation SummarizationSetBy = Automatic
+
+	column source_row_id
+		dataType: int64
+		formatString: 0
+		lineageTag: b10ed152-275b-4a83-9374-7a22c3ad057a
+		summarizeBy: sum
+		sourceColumn: source_row_id
+
+		annotation SummarizationSetBy = Automatic
+
+	measure 'Application Volume' = COUNTROWS('analytics fact_loan_application')
+		formatString: #,0
+		displayFolder: Executive Overview
+		lineageTag: 81ccf2ac-b177-46dd-a0f9-e8c0a08b143c
+
+	measure 'Expected Fact Rows' = 1161292
+		formatString: #,0
+		displayFolder: Validation
+		lineageTag: cfefad92-25c9-4e17-a9b2-435a0a41c845
+
+	measure 'Fact Row Variance' = [Application Volume] - [Expected Fact Rows]
+		formatString: #,0
+		displayFolder: Validation
+		lineageTag: 0f601f3b-d1f2-4a1d-a7a1-e2c776cddbb9
+
+	measure 'Originated Applications' =
+			
+			CALCULATE(
+			    [Application Volume],
+			    'analytics dim_action_taken'[action_taken] = 1
+			)
+		formatString: #,0
+		displayFolder: Executive Overview
+		lineageTag: 171bbce0-e379-48f9-9f19-33f9e9fcb744
+
+	measure 'Denied Applications' =
+			
+			CALCULATE(
+			    [Application Volume],
+			    'analytics dim_action_taken'[action_taken] = 3
+			)
+		formatString: #,0
+		displayFolder: Executive Overview
+		lineageTag: c5a390f8-1024-44b8-909a-a6dfe9215d2a
+
+	measure 'Withdrawn Applications' =
+			
+			CALCULATE(
+			    [Application Volume],
+			    'analytics dim_action_taken'[action_taken] = 4
+			)
+		formatString: #,0
+		displayFolder: Executive Overview
+		lineageTag: d20999e1-65d4-4462-aab0-218c1f9b46af
+
+	measure 'Incomplete Applications' =
+			
+			CALCULATE(
+			    [Application Volume],
+			    'analytics dim_action_taken'[action_taken] = 5
+			)
+		formatString: #,0
+		displayFolder: Executive Overview
+		lineageTag: 197f449c-e6bd-4d78-a61e-061562f67a41
+
+	measure 'Purchased Loans' =
+			
+			CALCULATE(
+			    [Application Volume],
+			    'analytics dim_action_taken'[action_taken] = 6
+			)
+		formatString: #,0
+		displayFolder: Executive Overview
+		lineageTag: 2b713c9d-47a6-4577-a8d8-945de5d08ab1
+
+	measure 'Origination Rate' = DIVIDE([Originated Applications], [Application Volume])
+		formatString: 0.0%
+		displayFolder: Executive Overview
+		lineageTag: a82448a7-4f7a-4614-ab14-a025a9533f5f
+
+	measure 'Denial Rate' = DIVIDE([Denied Applications], [Application Volume])
+		formatString: 0.0%
+		displayFolder: Executive Overview
+		lineageTag: 2079ec6d-c4dc-49a7-aa3c-46cb6ac6a85a
+
+	measure 'Withdrawal Rate' = DIVIDE([Withdrawn Applications], [Application Volume])
+		formatString: 0.0%
+		displayFolder: Executive Overview
+		lineageTag: 32fef576-8197-4bb2-8a50-5703955ca85d
+
+	measure 'Incomplete Rate' = DIVIDE([Incomplete Applications], [Application Volume])
+		formatString: 0.0%
+		displayFolder: Executive Overview
+		lineageTag: 054f3054-31e5-4364-9df9-2087c21e0349
+
+	measure 'Total Loan Amount' = SUM('analytics fact_loan_application'[loan_amount])
+		formatString: "$#,0;($#,0);$#,0"
+		displayFolder: Executive Overview
+		lineageTag: b6e96d4c-f224-42b4-a2f3-6cf0672be6d7
+
+	measure 'Average Originated Loan Amount' =
+			
+			CALCULATE(
+			    AVERAGE('analytics fact_loan_application'[loan_amount]),
+			    'analytics dim_action_taken'[action_taken] = 1
+			)
+		formatString: "$#,0;($#,0);$#,0"
+		displayFolder: Executive Overview
+		lineageTag: 9d1e3f75-a30b-47f6-a7ab-ac9a15c188d4
+
+	measure 'Average Applicant Income' = AVERAGE('analytics fact_loan_application'[income])
+		formatString: "$#,0K;($#,0K);$#,0K"
+		displayFolder: Executive Overview
+		lineageTag: d2fbb45b-909d-4b35-bf60-848b2d7da428
+
+	measure 'Median Applicant Income' = MEDIAN('analytics fact_loan_application'[income])
+		formatString: "$#,0K;($#,0K);$#,0K"
+		displayFolder: Executive Overview
+		lineageTag: b46b0a9b-55aa-4d6b-b14a-5b0b9dfec62e
+
+	measure 'Distinct Lenders' = DISTINCTCOUNT('analytics dim_lender'[lei])
+		formatString: #,0
+		displayFolder: Executive Overview
+		lineageTag: 5b90c807-b108-4709-970e-4b021936c04d
+
+	measure 'Distinct Counties' = DISTINCTCOUNT('analytics dim_geography'[county_code])
+		formatString: #,0
+		displayFolder: Executive Overview
+		lineageTag: 06372094-83a2-41ce-973b-eaa5b5cc55e2
+
+	partition 'analytics fact_loan_application' = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost", "banking_lending_intelligence"),
+				    analytics_fact_loan_application = Source{[Schema="analytics",Item="fact_loan_application"]}[Data]
+				in
+				    analytics_fact_loan_application
+
+	annotation PBI_ResultType = Table
+

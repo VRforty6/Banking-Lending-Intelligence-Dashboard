@@ -1,0 +1,295 @@
+table 'analytics dim_applicant_profile'
+	lineageTag: 73791c78-40fc-4008-8f64-fb5049378763
+
+	column applicant_profile_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 79bb9efe-fb0d-4fbf-8a7b-6430e0a03449
+		summarizeBy: none
+		sourceColumn: applicant_profile_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column applicant_ethnicity_1
+		dataType: string
+		lineageTag: 86e697c9-633c-4e4c-9ce8-a8072b7aef4e
+		summarizeBy: none
+		sourceColumn: applicant_ethnicity_1
+
+		annotation SummarizationSetBy = Automatic
+
+	column applicant_ethnicity_2
+		dataType: string
+		lineageTag: 9f63caed-9e19-443c-bb36-3bbe892008f3
+		summarizeBy: none
+		sourceColumn: applicant_ethnicity_2
+
+		annotation SummarizationSetBy = Automatic
+
+	column applicant_ethnicity_3
+		dataType: string
+		lineageTag: 532ab629-dd2f-4723-8f1d-af98b89f4b83
+		summarizeBy: none
+		sourceColumn: applicant_ethnicity_3
+
+		annotation SummarizationSetBy = Automatic
+
+	column applicant_ethnicity_4
+		dataType: string
+		lineageTag: 16c24c2b-5ccf-43ca-b923-220ccb5e7f7d
+		summarizeBy: none
+		sourceColumn: applicant_ethnicity_4
+
+		annotation SummarizationSetBy = Automatic
+
+	column applicant_ethnicity_5
+		dataType: string
+		lineageTag: 6b336293-e043-4d78-957e-11b59847bbd5
+		summarizeBy: none
+		sourceColumn: applicant_ethnicity_5
+
+		annotation SummarizationSetBy = Automatic
+
+	column applicant_ethnicity_observed
+		dataType: string
+		lineageTag: b5be9680-e227-4443-878d-54ddea3a3754
+		summarizeBy: none
+		sourceColumn: applicant_ethnicity_observed
+
+		annotation SummarizationSetBy = Automatic
+
+	column co_applicant_ethnicity_1
+		dataType: string
+		lineageTag: b9809b04-967d-4a21-88d3-b4ae751deb30
+		summarizeBy: none
+		sourceColumn: co_applicant_ethnicity_1
+
+		annotation SummarizationSetBy = Automatic
+
+	column co_applicant_ethnicity_2
+		dataType: string
+		lineageTag: e7bfd71a-2c98-49e8-8fb3-7f3ed862f9c1
+		summarizeBy: none
+		sourceColumn: co_applicant_ethnicity_2
+
+		annotation SummarizationSetBy = Automatic
+
+	column co_applicant_ethnicity_3
+		dataType: string
+		lineageTag: e85e6b28-6cfd-48bd-9fcf-58d05f9739c0
+		summarizeBy: none
+		sourceColumn: co_applicant_ethnicity_3
+
+		annotation SummarizationSetBy = Automatic
+
+	column co_applicant_ethnicity_4
+		dataType: string
+		lineageTag: 4c41edf8-6c20-40b4-b7f5-2cfc44c28c0c
+		summarizeBy: none
+		sourceColumn: co_applicant_ethnicity_4
+
+		annotation SummarizationSetBy = Automatic
+
+	column co_applicant_ethnicity_5
+		dataType: string
+		lineageTag: 6f2811db-cf5c-4d45-92fe-61c5d174f9ed
+		summarizeBy: none
+		sourceColumn: co_applicant_ethnicity_5
+
+		annotation SummarizationSetBy = Automatic
+
+	column co_applicant_ethnicity_observed
+		dataType: string
+		lineageTag: f150316b-d0ee-48f5-865b-a7e360425cd2
+		summarizeBy: none
+		sourceColumn: co_applicant_ethnicity_observed
+
+		annotation SummarizationSetBy = Automatic
+
+	column applicant_race_1
+		dataType: string
+		lineageTag: 1f479b98-a32b-410e-b453-f9d5f3f1b3e3
+		summarizeBy: none
+		sourceColumn: applicant_race_1
+
+		annotation SummarizationSetBy = Automatic
+
+	column applicant_race_2
+		dataType: string
+		lineageTag: 15264d4a-c547-4823-b745-b2fa9c80d0e5
+		summarizeBy: none
+		sourceColumn: applicant_race_2
+
+		annotation SummarizationSetBy = Automatic
+
+	column applicant_race_3
+		dataType: string
+		lineageTag: aba1cd68-abdf-4ef2-97e6-54e3e8df8e62
+		summarizeBy: none
+		sourceColumn: applicant_race_3
+
+		annotation SummarizationSetBy = Automatic
+
+	column applicant_race_4
+		dataType: string
+		lineageTag: d68b4600-9101-46ac-a574-caf336495f7e
+		summarizeBy: none
+		sourceColumn: applicant_race_4
+
+		annotation SummarizationSetBy = Automatic
+
+	column applicant_race_5
+		dataType: string
+		lineageTag: d3fa93dc-7cb8-4ecc-9807-cb6ddf109bf0
+		summarizeBy: none
+		sourceColumn: applicant_race_5
+
+		annotation SummarizationSetBy = Automatic
+
+	column co_applicant_race_1
+		dataType: string
+		lineageTag: ab1b1692-f0a5-4851-a049-d81fe42032c1
+		summarizeBy: none
+		sourceColumn: co_applicant_race_1
+
+		annotation SummarizationSetBy = Automatic
+
+	column co_applicant_race_2
+		dataType: string
+		lineageTag: bf0ceaae-a42b-4b6b-9898-4ace9a8e1eeb
+		summarizeBy: none
+		sourceColumn: co_applicant_race_2
+
+		annotation SummarizationSetBy = Automatic
+
+	column co_applicant_race_3
+		dataType: string
+		lineageTag: 1fdf61dd-bde2-4c87-bfc3-c7fb00aee0b7
+		summarizeBy: none
+		sourceColumn: co_applicant_race_3
+
+		annotation SummarizationSetBy = Automatic
+
+	column co_applicant_race_4
+		dataType: string
+		lineageTag: 93259ca3-b97c-42d6-9e0d-86afc21fe088
+		summarizeBy: none
+		sourceColumn: co_applicant_race_4
+
+		annotation SummarizationSetBy = Automatic
+
+	column co_applicant_race_5
+		dataType: string
+		lineageTag: d7e3e7d7-c93c-47eb-8a67-fa01da89f12f
+		summarizeBy: none
+		sourceColumn: co_applicant_race_5
+
+		annotation SummarizationSetBy = Automatic
+
+	column co_applicant_race_observed
+		dataType: string
+		lineageTag: 9298d239-d416-4138-b0ef-643ecde6bda2
+		summarizeBy: none
+		sourceColumn: co_applicant_race_observed
+
+		annotation SummarizationSetBy = Automatic
+
+	column applicant_sex
+		dataType: string
+		lineageTag: 2f462780-843b-4a60-9129-76d0b81c4ec2
+		summarizeBy: none
+		sourceColumn: applicant_sex
+
+		annotation SummarizationSetBy = Automatic
+
+	column co_applicant_sex
+		dataType: string
+		lineageTag: 1d252062-cdbc-44d9-bba0-f137d1162407
+		summarizeBy: none
+		sourceColumn: co_applicant_sex
+
+		annotation SummarizationSetBy = Automatic
+
+	column applicant_sex_observed
+		dataType: string
+		lineageTag: 9b1a6521-ac6f-4282-9312-e46ede3b1625
+		summarizeBy: none
+		sourceColumn: applicant_sex_observed
+
+		annotation SummarizationSetBy = Automatic
+
+	column co_applicant_sex_observed
+		dataType: string
+		lineageTag: d15ebac2-c188-41ad-80bb-807ed015456a
+		summarizeBy: none
+		sourceColumn: co_applicant_sex_observed
+
+		annotation SummarizationSetBy = Automatic
+
+	column applicant_age
+		dataType: string
+		lineageTag: 44c2c1d0-dbf0-4a36-a18b-f6b58b1ad6a9
+		summarizeBy: none
+		sourceColumn: applicant_age
+
+		annotation SummarizationSetBy = Automatic
+
+	column co_applicant_age
+		dataType: string
+		lineageTag: 727a09cd-6963-4074-8034-1cacf35bf584
+		summarizeBy: none
+		sourceColumn: co_applicant_age
+
+		annotation SummarizationSetBy = Automatic
+
+	column applicant_age_above_62
+		dataType: string
+		lineageTag: b0040c86-b0d2-42ef-8c56-604ebc1de4eb
+		summarizeBy: none
+		sourceColumn: applicant_age_above_62
+
+		annotation SummarizationSetBy = Automatic
+
+	column co_applicant_age_above_62
+		dataType: string
+		lineageTag: e8b45bb6-39d7-415a-b517-dae20051d195
+		summarizeBy: none
+		sourceColumn: co_applicant_age_above_62
+
+		annotation SummarizationSetBy = Automatic
+
+	column applicant_credit_score_type
+		dataType: string
+		lineageTag: 641a0993-48da-4e4f-aaae-e474ec25b04a
+		summarizeBy: none
+		sourceColumn: applicant_credit_score_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column co_applicant_credit_score_type
+		dataType: string
+		lineageTag: 37eaa717-a4cb-470d-9bf9-70a610e397f8
+		summarizeBy: none
+		sourceColumn: co_applicant_credit_score_type
+
+		annotation SummarizationSetBy = Automatic
+
+	column profile_hash
+		dataType: string
+		lineageTag: bef9bb01-c845-42d7-a0d5-31870a7d9440
+		summarizeBy: none
+		sourceColumn: profile_hash
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'analytics dim_applicant_profile' = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost", "banking_lending_intelligence"),
+				    analytics_dim_applicant_profile = Source{[Schema="analytics",Item="dim_applicant_profile"]}[Data]
+				in
+				    analytics_dim_applicant_profile
+
+	annotation PBI_ResultType = Table
+

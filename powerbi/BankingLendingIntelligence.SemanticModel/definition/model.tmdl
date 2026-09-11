@@ -1,0 +1,26 @@
+model Model
+	culture: en-US
+	defaultPowerBIDataSourceVersion: powerBI_V3
+	sourceQueryCulture: en-CA
+	valueFilterBehavior: independent
+	dataAccessOptions
+		legacyRedirects
+		returnErrorValuesAsNull
+
+annotation __PBI_TimeIntelligenceEnabled = 1
+
+annotation PBI_QueryOrder = ["analytics dim_action_taken","analytics dim_applicant_profile","analytics dim_geography","analytics dim_lender","analytics dim_loan","analytics fact_loan_application"]
+
+annotation PBI_ProTooling = ["DevMode"]
+
+ref table 'analytics dim_action_taken'
+ref table 'analytics dim_applicant_profile'
+ref table 'analytics dim_geography'
+ref table 'analytics dim_lender'
+ref table 'analytics dim_loan'
+ref table 'analytics fact_loan_application'
+ref table DateTableTemplate_d2e41eac-18d3-45a0-8b52-011ac5541a2f
+ref table LocalDateTable_a8989b91-22e1-4e6a-8cfc-a8ae71527b35
+
+ref cultureInfo en-US
+

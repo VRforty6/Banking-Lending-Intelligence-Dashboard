@@ -1,0 +1,31 @@
+table 'analytics dim_lender'
+	lineageTag: a6b6e20c-3f60-4a75-838f-0521d167db71
+
+	column lei_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 09ed34a5-884d-45a7-8fa7-6ffacdc115b5
+		summarizeBy: none
+		sourceColumn: lei_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column lei
+		dataType: string
+		lineageTag: f6ad7ddd-6873-4a73-a0fd-564c2c956491
+		summarizeBy: none
+		sourceColumn: lei
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'analytics dim_lender' = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost", "banking_lending_intelligence"),
+				    analytics_dim_lender = Source{[Schema="analytics",Item="dim_lender"]}[Data]
+				in
+				    analytics_dim_lender
+
+	annotation PBI_ResultType = Table
+

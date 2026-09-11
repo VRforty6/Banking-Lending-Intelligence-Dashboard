@@ -1,0 +1,39 @@
+table 'analytics dim_action_taken'
+	lineageTag: 5ba7764e-8205-415f-990d-d8f554c61e82
+
+	column action_taken_key
+		dataType: int64
+		formatString: 0
+		lineageTag: 7f7baf5b-de03-4679-99a3-d6fd57ef0c28
+		summarizeBy: none
+		sourceColumn: action_taken_key
+
+		annotation SummarizationSetBy = Automatic
+
+	column action_taken
+		dataType: int64
+		formatString: 0
+		lineageTag: cf0d6634-0182-42ae-80a4-360258f9a566
+		summarizeBy: none
+		sourceColumn: action_taken
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Action Taken Label' = SWITCH('analytics dim_action_taken'[action_taken], 1, "Loan originated", 2, "Approved, not accepted", 3, "Denied", 4, "Withdrawn", 5, "Closed for incompleteness", 6, "Purchased loan", 7, "Preapproval denied", 8, "Preapproval approved, not accepted", "Unknown")
+		dataType: string
+		lineageTag: 1c9ed68e-4acb-4a66-a520-8654678ef8bc
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'analytics dim_action_taken' = m
+		mode: import
+		source =
+				let
+				    Source = PostgreSQL.Database("localhost", "banking_lending_intelligence"),
+				    analytics_dim_action_taken = Source{[Schema="analytics",Item="dim_action_taken"]}[Data]
+				in
+				    analytics_dim_action_taken
+
+	annotation PBI_ResultType = Table
+

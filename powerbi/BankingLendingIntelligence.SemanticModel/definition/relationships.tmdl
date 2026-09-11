@@ -1,0 +1,40 @@
+relationship c939ffd6-33aa-4e0e-a81d-7909ea6ea579
+	joinOnDateBehavior: datePartOnly
+	fromColumn: 'analytics fact_loan_application'.load_timestamp
+	toColumn: LocalDateTable_a8989b91-22e1-4e6a-8cfc-a8ae71527b35.Date
+
+relationship 42a94036-7c52-468a-a636-c9409e425d70
+	crossFilteringBehavior: oneDirection
+	fromColumn: 'analytics fact_loan_application'.action_taken_key
+	toColumn: 'analytics dim_action_taken'.action_taken_key
+
+	annotation PBI_IsFromSource = FS
+
+relationship 6d29c9db-26d9-4dba-9634-873e15f520c3
+	crossFilteringBehavior: oneDirection
+	fromColumn: 'analytics fact_loan_application'.applicant_profile_key
+	toColumn: 'analytics dim_applicant_profile'.applicant_profile_key
+
+	annotation PBI_IsFromSource = FS
+
+relationship c383d619-9a45-4414-96f1-939250cbab2a
+	crossFilteringBehavior: oneDirection
+	fromColumn: 'analytics fact_loan_application'.geography_key
+	toColumn: 'analytics dim_geography'.geography_key
+
+	annotation PBI_IsFromSource = FS
+
+relationship b338950a-6306-40cb-834d-cfc6b1393390
+	crossFilteringBehavior: oneDirection
+	fromColumn: 'analytics fact_loan_application'.lei_key
+	toColumn: 'analytics dim_lender'.lei_key
+
+	annotation PBI_IsFromSource = FS
+
+relationship ac54f18c-0146-4fd0-b2c7-954f22945f09
+	crossFilteringBehavior: oneDirection
+	fromColumn: 'analytics fact_loan_application'.loan_key
+	toColumn: 'analytics dim_loan'.loan_key
+
+	annotation PBI_IsFromSource = FS
+
