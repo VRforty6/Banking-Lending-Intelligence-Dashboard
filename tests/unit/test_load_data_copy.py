@@ -1,10 +1,20 @@
 import csv
 from io import StringIO
+from pathlib import Path
 from types import SimpleNamespace
 
 import pandas as pd
 
-from load_data import STAGING_COPY_COLUMNS, copy_batch_to_staging, populate_dimensions
+from load_data import (
+    STAGING_COPY_COLUMNS,
+    copy_batch_to_staging,
+    is_result_returning_validation_statement,
+    populate_dimensions,
+)
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+VALIDATION_SQL = PROJECT_ROOT / "sql" / "06_validation_queries.sql"
 
 
 class FakeCursor:
@@ -128,3 +138,35 @@ def test_dim_geography_derives_missing_county_from_census_tract():
     )
 
     assert canonical_county_code == "48113"
+
+
+def test_validation_sql_uses_dynamic_staging_fact_row_counts():
+    """Validation row counts compare current staging and fact counts."""
+    sql = VALIDATION_SQL.read_text(encoding="utf-8")
+
+    assert "1161292" not in sql
+    assert "warehouse_counts AS" in sql
+    assert "(SELECT COUNT(*) FROM staging.hmda_raw) AS staging_count" in sql
+    assert (
+        "(SELECT COUNT(*) FROM analytics.fact_loan_application) AS fact_count"
+        in sql
+    )
+    assert "CASE WHEN staging_count = fact_count THEN 'PASS'" in sql
+    assert "CASE WHEN fact_count = staging_count THEN 'PASS'" in sql
+
+
+def test_validation_sql_duplicate_check_returns_zero_without_duplicates():
+    """Duplicate source-row validation cannot return NULL for empty results."""
+    sql = VALIDATION_SQL.read_text(encoding="utf-8")
+
+    assert "duplicate_source_rows AS" in sql
+    assert "COALESCE(SUM(row_count), 0)::bigint AS duplicate_count" in sql
+    assert "duplicate_count AS actual_count" in sql
+    assert "CASE WHEN duplicate_count = 0 THEN 'PASS'" in sql
+
+
+def test_validation_runner_fetches_with_query_results():
+    """Dynamic validation CTEs are logged as result-returning checks."""
+    assert is_result_returning_validation_statement("SELECT 1")
+    assert is_result_returning_validation_statement("  WITH counts AS (SELECT 1)")
+    assert not is_result_returning_validation_statement("CREATE INDEX example")

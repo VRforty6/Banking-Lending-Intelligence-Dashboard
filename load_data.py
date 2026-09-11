@@ -688,6 +688,11 @@ def create_views(engine: Engine) -> None:
     logger.info("Creating views.")
     execute_sql_file(engine, VIEWS_SQL)
 
+def is_result_returning_validation_statement(statement: str) -> bool:
+    """Return True when a validation statement should be fetched and logged."""
+    normalized = statement.strip().upper()
+    return normalized.startswith("SELECT") or normalized.startswith("WITH")
+
 def run_validations(engine: Engine) -> None:
     """Run validation queries and log results."""
     logger.info("Running validation queries.")
@@ -711,7 +716,7 @@ def run_validations(engine: Engine) -> None:
             try:
                 result = conn.execute(text(statement))
                 # For SELECT statements, we can fetch and log the results
-                if statement.strip().upper().startswith('SELECT'):
+                if is_result_returning_validation_statement(statement):
                     rows = result.fetchall()
                     # Log the query and results
                     logger.info(f"Validation query: {statement}")

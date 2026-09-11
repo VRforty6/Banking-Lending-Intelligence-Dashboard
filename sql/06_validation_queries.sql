@@ -1,20 +1,37 @@
+WITH warehouse_counts AS (
+    SELECT
+        (SELECT COUNT(*) FROM staging.hmda_raw) AS staging_count,
+        (SELECT COUNT(*) FROM analytics.fact_loan_application) AS fact_count
+),
+duplicate_source_rows AS (
+    SELECT COALESCE(SUM(row_count), 0)::bigint AS duplicate_count
+    FROM (
+        SELECT COUNT(*) AS row_count
+        FROM staging.hmda_raw
+        GROUP BY stg_row_id
+        HAVING COUNT(*) > 1
+    ) duplicates
+)
 SELECT
     'Staging row count' AS check,
-    (SELECT COUNT(*) FROM staging.hmda_raw) AS actual_count,
-    1161292 AS expected_count,
-    CASE WHEN (SELECT COUNT(*) FROM staging.hmda_raw) = 1161292 THEN 'PASS' ELSE 'FAIL' END AS status
+    staging_count AS actual_count,
+    fact_count AS expected_count,
+    CASE WHEN staging_count = fact_count THEN 'PASS' ELSE 'FAIL' END AS status
+FROM warehouse_counts
 UNION ALL
 SELECT
     'Fact row count' AS check,
-    (SELECT COUNT(*) FROM analytics.fact_loan_application) AS actual_count,
-    1161292 AS expected_count,
-    CASE WHEN (SELECT COUNT(*) FROM analytics.fact_loan_application) = 1161292 THEN 'PASS' ELSE 'FAIL' END AS status
+    fact_count AS actual_count,
+    staging_count AS expected_count,
+    CASE WHEN fact_count = staging_count THEN 'PASS' ELSE 'FAIL' END AS status
+FROM warehouse_counts
 UNION ALL
 SELECT
     'Duplicate source rows in staging' AS check,
-    (SELECT COUNT(*) FROM staging.hmda_raw GROUP BY stg_row_id HAVING COUNT(*) > 1) AS actual_count,
+    duplicate_count AS actual_count,
     0 AS expected_count,
-    CASE WHEN (SELECT COUNT(*) FROM staging.hmda_raw GROUP BY stg_row_id HAVING COUNT(*) > 1) = 0 THEN 'PASS' ELSE 'FAIL' END AS status
+    CASE WHEN duplicate_count = 0 THEN 'PASS' ELSE 'FAIL' END AS status
+FROM duplicate_source_rows
 UNION ALL
 SELECT
     'Null mandatory keys in fact' AS check,
