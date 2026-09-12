@@ -1,0 +1,21 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "chartLoanPurposeMixState",
+  "position": { "x": 890, "y": 775, "z": 4302, "height": 245, "width": 990, "tabOrder": 4302 },
+  "visual": {
+    "visualType": "barChart",
+    "query": {
+      "queryState": {
+        "Category": { "projections": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics dim_geography" } }, "Property": "State Display" } }, "queryRef": "analytics dim_geography.State Display", "nativeQueryRef": "State" } ] },
+        "Series": { "projections": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics dim_loan" } }, "Property": "Loan Purpose Label" } }, "queryRef": "analytics dim_loan.Loan Purpose Label", "nativeQueryRef": "Loan purpose" } ] },
+        "Y": { "projections": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Application Volume" } }, "queryRef": "analytics fact_loan_application.Application Volume", "nativeQueryRef": "Applications" } ] }
+      },
+      "sortDefinition": { "sort": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Application Volume" } }, "direction": "Descending" } ], "isDefaultSort": true }
+    },
+    "visualContainerObjects": {
+      "title": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Loan purpose mix by state'" } } } } } ],
+      "subTitle": [ { "properties": { "show": { "expr": { "Literal": { "Value": "false" } } } } } ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

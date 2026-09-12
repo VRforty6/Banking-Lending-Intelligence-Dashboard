@@ -1,0 +1,8 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "b4c9d7e2a5f64190b3c8",
+  "displayName": "State Comparison",
+  "displayOption": "FitToPage",
+  "height": 1080,
+  "width": 1920
+}

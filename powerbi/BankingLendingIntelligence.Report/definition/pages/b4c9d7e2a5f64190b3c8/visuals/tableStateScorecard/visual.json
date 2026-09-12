@@ -1,0 +1,26 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "tableStateScorecard",
+  "position": { "x": 360, "y": 220, "z": 4200, "height": 235, "width": 1520, "tabOrder": 4200 },
+  "visual": {
+    "visualType": "tableEx",
+    "query": {
+      "queryState": {
+        "Values": { "projections": [
+          { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics dim_geography" } }, "Property": "State Display" } }, "queryRef": "analytics dim_geography.State Display", "nativeQueryRef": "State" },
+          { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Application Volume" } }, "queryRef": "analytics fact_loan_application.Application Volume", "nativeQueryRef": "Applications" },
+          { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Origination Rate" } }, "queryRef": "analytics fact_loan_application.Origination Rate", "nativeQueryRef": "Origination Rate" },
+          { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Denial Rate" } }, "queryRef": "analytics fact_loan_application.Denial Rate", "nativeQueryRef": "Denial Rate" },
+          { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Average Originated Loan Amount" } }, "queryRef": "analytics fact_loan_application.Average Originated Loan Amount", "nativeQueryRef": "Avg Loan Amount" },
+          { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Median Applicant Income" } }, "queryRef": "analytics fact_loan_application.Median Applicant Income", "nativeQueryRef": "Median Income" }
+        ] }
+      },
+      "sortDefinition": { "sort": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Application Volume" } }, "direction": "Descending" } ], "isDefaultSort": true }
+    },
+    "visualContainerObjects": {
+      "title": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'State scorecard'" } } } } } ],
+      "subTitle": [ { "properties": { "show": { "expr": { "Literal": { "Value": "false" } } } } } ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

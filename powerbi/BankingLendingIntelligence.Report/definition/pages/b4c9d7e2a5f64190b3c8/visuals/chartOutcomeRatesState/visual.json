@@ -1,0 +1,23 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "chartOutcomeRatesState",
+  "position": { "x": 890, "y": 490, "z": 4300, "height": 250, "width": 500, "tabOrder": 4300 },
+  "visual": {
+    "visualType": "clusteredBarChart",
+    "query": {
+      "queryState": {
+        "Category": { "projections": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics dim_geography" } }, "Property": "State Display" } }, "queryRef": "analytics dim_geography.State Display", "nativeQueryRef": "State" } ] },
+        "Y": { "projections": [
+          { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Origination Rate" } }, "queryRef": "analytics fact_loan_application.Origination Rate", "nativeQueryRef": "Origination Rate" },
+          { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Denial Rate" } }, "queryRef": "analytics fact_loan_application.Denial Rate", "nativeQueryRef": "Denial Rate" }
+        ] }
+      },
+      "sortDefinition": { "sort": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Origination Rate" } }, "direction": "Descending" } ], "isDefaultSort": true }
+    },
+    "visualContainerObjects": {
+      "title": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Origination and denial rates by state'" } } } } } ],
+      "subTitle": [ { "properties": { "show": { "expr": { "Literal": { "Value": "false" } } } } } ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}
