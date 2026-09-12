@@ -1,6 +1,6 @@
 HMDA ETL Validation Report
-Total rows processed: 8199958
-Valid rows: 8199958
+Total rows processed: 12006526
+Valid rows: 12006526
 Rejected rows: 0
 Reconciliation difference: 0
 Failed activity_year (missing): 0
@@ -9,6 +9,7 @@ Failed loan_amount (invalid): 0
 Failed action_taken (invalid): 0
 
 Counts by source file:
+  hmda_2023_multi_state.csv: total=3806568, valid=3806568, rejected=0
   hmda_2024_CA.csv: total=1026119, valid=1026119, rejected=0
   hmda_2024_FL.csv: total=1047439, valid=1047439, rejected=0
   hmda_2024_IL.csv: total=399684, valid=399684, rejected=0
@@ -21,12 +22,13 @@ Counts by source file:
   hmda_2025_TX.csv: total=1144277, valid=1144277, rejected=0
 
 Counts by year:
+  2023: total=3806568, valid=3806568, rejected=0
   2024: total=3931627, valid=3931627, rejected=0
   2025: total=4268331, valid=4268331, rejected=0
 
 Counts by state:
-  CA: total=2187411, valid=2187411, rejected=0
-  FL: total=2123779, valid=2123779, rejected=0
-  IL: total=855552, valid=855552, rejected=0
-  NY: total=814168, valid=814168, rejected=0
-  TX: total=2219048, valid=2219048, rejected=0
+  CA: total=3149484, valid=3149484, rejected=0
+  FL: total=3168583, valid=3168583, rejected=0
+  IL: total=1221850, valid=1221850, rejected=0
+  NY: total=1205742, valid=1205742, rejected=0
+  TX: total=3260867, valid=3260867, rejected=0
