@@ -148,7 +148,7 @@ table 'analytics fact_loan_application'
 		displayFolder: Executive Overview
 		lineageTag: 81ccf2ac-b177-46dd-a0f9-e8c0a08b143c
 
-	measure 'Expected Fact Rows' = 1161292
+	measure 'Expected Fact Rows' = 12006526
 		formatString: #,0
 		displayFolder: Validation
 		lineageTag: cfefad92-25c9-4e17-a9b2-435a0a41c845
