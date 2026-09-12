@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "kpiOriginationRate",
+  "position": { "x": 668, "y": 40, "z": 3101, "height": 130, "width": 284, "tabOrder": 3101 },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": { "queryState": { "Data": { "projections": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Origination Rate" } }, "queryRef": "analytics fact_loan_application.Origination Rate", "nativeQueryRef": "Origination Rate" } ] } } },
+    "visualContainerObjects": { "title": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Origination rate'" } } } } } ], "subTitle": [ { "properties": { "show": { "expr": { "Literal": { "Value": "false" } } } } } ] },
+    "drillFilterOtherVisuals": true
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/page/2.1.0/schema.json",
+  "name": "a6f4c2e91b7d4a08c3f5",
+  "displayName": "Multi-Year Lending Trends",
+  "displayOption": "FitToPage",
+  "height": 1080,
+  "width": 1920
+}

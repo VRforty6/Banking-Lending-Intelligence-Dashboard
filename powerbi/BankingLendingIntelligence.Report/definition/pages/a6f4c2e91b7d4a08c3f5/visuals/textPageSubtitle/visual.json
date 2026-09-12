@@ -1,0 +1,27 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "textPageSubtitle",
+  "position": { "x": 1025, "y": 4, "z": 3401, "height": 30, "width": 855, "tabOrder": 3401 },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "2023–2025 | California · Texas · Florida · New York · Illinois",
+                    "textStyle": { "fontSize": "11pt", "fontFamily": "Segoe UI", "color": "#605E5C" }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": false
+  }
+}

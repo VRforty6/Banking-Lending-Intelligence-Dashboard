@@ -238,6 +238,66 @@ table 'analytics fact_loan_application'
 		displayFolder: Executive Overview
 		lineageTag: 054f3054-31e5-4364-9df9-2087c21e0349
 
+	measure 'Application Volume YoY %' = ```
+			VAR CurrentYear = SELECTEDVALUE('analytics fact_loan_application'[application_year])
+			VAR CurrentVolume = [Application Volume]
+			VAR PriorVolume =
+			    CALCULATE(
+			        [Application Volume],
+			        REMOVEFILTERS('analytics fact_loan_application'[application_year]),
+			        'analytics fact_loan_application'[application_year] = CurrentYear - 1
+			    )
+			RETURN
+			    IF(
+			        ISBLANK(CurrentYear) || ISBLANK(PriorVolume),
+			        BLANK(),
+			        DIVIDE(CurrentVolume - PriorVolume, PriorVolume)
+			    )
+			```
+		formatString: 0.0%
+		displayFolder: Multi-Year Lending Trends
+		lineageTag: 7d2e4a12-596b-4b6d-9bc5-f108d3c1bb76
+
+	measure 'Origination Rate YoY Change' = ```
+			VAR CurrentYear = SELECTEDVALUE('analytics fact_loan_application'[application_year])
+			VAR CurrentRate = [Origination Rate]
+			VAR PriorRate =
+			    CALCULATE(
+			        [Origination Rate],
+			        REMOVEFILTERS('analytics fact_loan_application'[application_year]),
+			        'analytics fact_loan_application'[application_year] = CurrentYear - 1
+			    )
+			RETURN
+			    IF(
+			        ISBLANK(CurrentYear) || ISBLANK(PriorRate),
+			        BLANK(),
+			        CurrentRate - PriorRate
+			    )
+			```
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Multi-Year Lending Trends
+		lineageTag: 41c38e86-3ea8-423a-b45e-0aa889560759
+
+	measure 'Denial Rate YoY Change' = ```
+			VAR CurrentYear = SELECTEDVALUE('analytics fact_loan_application'[application_year])
+			VAR CurrentRate = [Denial Rate]
+			VAR PriorRate =
+			    CALCULATE(
+			        [Denial Rate],
+			        REMOVEFILTERS('analytics fact_loan_application'[application_year]),
+			        'analytics fact_loan_application'[application_year] = CurrentYear - 1
+			    )
+			RETURN
+			    IF(
+			        ISBLANK(CurrentYear) || ISBLANK(PriorRate),
+			        BLANK(),
+			        CurrentRate - PriorRate
+			    )
+			```
+		formatString: +0.0%;-0.0%;0.0%
+		displayFolder: Multi-Year Lending Trends
+		lineageTag: 51c2e4da-f078-467c-a9f9-16c9a45cf745
+
 	measure 'Total Loan Amount' = SUM('analytics fact_loan_application'[loan_amount])
 		formatString: "$#,0;($#,0);$#,0"
 		displayFolder: Executive Overview
