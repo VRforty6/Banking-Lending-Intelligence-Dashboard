@@ -47,10 +47,11 @@ table 'analytics dim_geography'
 	column 'County Name' = ```
 			VAR StateCode = 'analytics dim_geography'[state_code]
 			VAR CountyCode = 'analytics dim_geography'[county_code]
+			VAR NormalizedCountyCode = UPPER(TRIM(CountyCode))
 			RETURN
 			    SWITCH(
 			        TRUE(),
-			        ISBLANK(CountyCode) || CountyCode = "" || CountyCode = "UNKNOWN", "Unknown county",
+			        ISBLANK(CountyCode) || NormalizedCountyCode = "" || NormalizedCountyCode = "UNKNOWN" || NormalizedCountyCode = "NA" || NormalizedCountyCode = "N/A" || NormalizedCountyCode = "NULL", "Unknown county",
 			        ISBLANK(StateCode) || StateCode = "", "Unknown - " & CountyCode,
 			        StateCode = "CA" || StateCode = "TX" || StateCode = "FL" || StateCode = "NY" || StateCode = "IL", StateCode & " - " & CountyCode,
 			        "Unmapped county"
