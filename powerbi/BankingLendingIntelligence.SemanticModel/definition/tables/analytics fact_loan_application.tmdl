@@ -239,8 +239,13 @@ table 'analytics fact_loan_application'
 		lineageTag: 054f3054-31e5-4364-9df9-2087c21e0349
 
 	measure 'Application Volume YoY %' = ```
-			VAR CurrentYear = SELECTEDVALUE('analytics fact_loan_application'[application_year])
-			VAR CurrentVolume = [Application Volume]
+			VAR CurrentYear = MAX('analytics fact_loan_application'[application_year])
+			VAR CurrentVolume =
+			    CALCULATE(
+			        [Application Volume],
+			        REMOVEFILTERS('analytics fact_loan_application'[application_year]),
+			        'analytics fact_loan_application'[application_year] = CurrentYear
+			    )
 			VAR PriorVolume =
 			    CALCULATE(
 			        [Application Volume],
@@ -259,8 +264,13 @@ table 'analytics fact_loan_application'
 		lineageTag: 7d2e4a12-596b-4b6d-9bc5-f108d3c1bb76
 
 	measure 'Origination Rate YoY Change' = ```
-			VAR CurrentYear = SELECTEDVALUE('analytics fact_loan_application'[application_year])
-			VAR CurrentRate = [Origination Rate]
+			VAR CurrentYear = MAX('analytics fact_loan_application'[application_year])
+			VAR CurrentRate =
+			    CALCULATE(
+			        [Origination Rate],
+			        REMOVEFILTERS('analytics fact_loan_application'[application_year]),
+			        'analytics fact_loan_application'[application_year] = CurrentYear
+			    )
 			VAR PriorRate =
 			    CALCULATE(
 			        [Origination Rate],
@@ -279,8 +289,13 @@ table 'analytics fact_loan_application'
 		lineageTag: 41c38e86-3ea8-423a-b45e-0aa889560759
 
 	measure 'Denial Rate YoY Change' = ```
-			VAR CurrentYear = SELECTEDVALUE('analytics fact_loan_application'[application_year])
-			VAR CurrentRate = [Denial Rate]
+			VAR CurrentYear = MAX('analytics fact_loan_application'[application_year])
+			VAR CurrentRate =
+			    CALCULATE(
+			        [Denial Rate],
+			        REMOVEFILTERS('analytics fact_loan_application'[application_year]),
+			        'analytics fact_loan_application'[application_year] = CurrentYear
+			    )
 			VAR PriorRate =
 			    CALCULATE(
 			        [Denial Rate],

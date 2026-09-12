@@ -23,11 +23,11 @@
                       "Entity": "analytics dim_lender"
                     }
                   },
-                  "Property": "lei"
+                  "Property": "Lender Display"
                 }
               },
-              "queryRef": "analytics dim_lender.lei",
-              "nativeQueryRef": "lei"
+              "queryRef": "analytics dim_lender.Lender Display",
+              "nativeQueryRef": "Lender"
             }
           ]
         },
@@ -83,7 +83,7 @@
             "text": {
               "expr": {
                 "Literal": {
-                  "Value": "'Top lenders by application volume (LEI)'"
+                  "Value": "'Top lenders by application volume'"
                 }
               }
             }

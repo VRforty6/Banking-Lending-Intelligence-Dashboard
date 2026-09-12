@@ -104,7 +104,8 @@ CREATE TABLE staging.hmda_raw (
 
 CREATE TABLE analytics.dim_lender (
     lei_key SERIAL PRIMARY KEY,
-    lei TEXT NOT NULL UNIQUE
+    lei TEXT NOT NULL UNIQUE,
+    lender_name TEXT
 );
 
 CREATE TABLE analytics.dim_geography (

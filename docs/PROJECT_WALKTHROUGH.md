@@ -185,7 +185,9 @@ This structure gives Power BI a clean analytical model with dimensions filtering
 
 `dim_lender` stores lender identity at the LEI grain.
 
-The project avoids inventing lender names when the source does not provide an enriched lender-name field. Where only LEI is available, the model keeps LEI rather than creating unsupported labels.
+Lender names are handled as reference enrichment rather than as part of the HMDA LAR ingestion path because the public LAR files contain LEI values but do not contain institution names. The enrichment process uses official HMDA/FFIEC/CFPB institution metadata, stores the result as nullable `lender_name`, and keeps LEI as the stable business identifier.
+
+Power BI uses a `Lender Display` fallback so matched lenders show their official name while unmatched lenders continue to display the LEI. The project does not invent lender names for unmatched LEIs.
 
 Business role:
 

@@ -18,6 +18,21 @@ table 'analytics dim_lender'
 
 		annotation SummarizationSetBy = Automatic
 
+	column lender_name
+		dataType: string
+		lineageTag: 2f0df559-18bd-4dc1-9f70-5fa37ff93bd8
+		summarizeBy: none
+		sourceColumn: lender_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Lender Display' = COALESCE('analytics dim_lender'[lender_name], 'analytics dim_lender'[lei])
+		dataType: string
+		lineageTag: 2b64d233-8c2e-405b-bd86-3770864b5d07
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
 	partition 'analytics dim_lender' = m
 		mode: import
 		source =

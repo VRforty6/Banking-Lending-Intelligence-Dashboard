@@ -9,9 +9,9 @@
         "Values": {
           "projections": [
             {
-              "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics dim_lender" } }, "Property": "lei" } },
-              "queryRef": "analytics dim_lender.lei",
-              "nativeQueryRef": "Lender LEI"
+              "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics dim_lender" } }, "Property": "Lender Display" } },
+              "queryRef": "analytics dim_lender.Lender Display",
+              "nativeQueryRef": "Lender"
             }
           ]
         }
@@ -19,7 +19,7 @@
     },
     "visualContainerObjects": {
       "title": [
-        { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Lender / LEI'" } } } } }
+        { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Lender'" } } } } }
       ],
       "subTitle": [
         { "properties": { "show": { "expr": { "Literal": { "Value": "false" } } } } }
