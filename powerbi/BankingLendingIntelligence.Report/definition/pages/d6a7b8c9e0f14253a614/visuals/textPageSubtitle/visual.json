@@ -1,0 +1,27 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "textPageSubtitle",
+  "position": { "x": 360, "y": 34, "z": 6401, "height": 28, "width": 1250, "tabOrder": 6401 },
+  "visual": {
+    "visualType": "textbox",
+    "objects": {
+      "general": [
+        {
+          "properties": {
+            "paragraphs": [
+              {
+                "textRuns": [
+                  {
+                    "value": "2023-2025 | Income, demographics, outcomes, and lending patterns",
+                    "textStyle": { "fontSize": "10pt", "fontFamily": "Segoe UI", "color": "#605E5C" }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": false
+  }
+}
