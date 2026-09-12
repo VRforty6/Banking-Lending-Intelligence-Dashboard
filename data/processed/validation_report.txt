@@ -1,6 +1,6 @@
 HMDA ETL Validation Report
-Total rows processed: 3381909
-Valid rows: 3381909
+Total rows processed: 4268331
+Valid rows: 4268331
 Rejected rows: 0
 Reconciliation difference: 0
 Failed activity_year (missing): 0
@@ -11,12 +11,16 @@ Failed action_taken (invalid): 0
 Counts by source file:
   hmda_2025_CA.csv: total=1161292, valid=1161292, rejected=0
   hmda_2025_FL.csv: total=1076340, valid=1076340, rejected=0
+  hmda_2025_IL.csv: total=455868, valid=455868, rejected=0
+  hmda_2025_NY.csv: total=430554, valid=430554, rejected=0
   hmda_2025_TX.csv: total=1144277, valid=1144277, rejected=0
 
 Counts by year:
-  2025: total=3381909, valid=3381909, rejected=0
+  2025: total=4268331, valid=4268331, rejected=0
 
 Counts by state:
   CA: total=1161292, valid=1161292, rejected=0
   FL: total=1076340, valid=1076340, rejected=0
+  IL: total=455868, valid=455868, rejected=0
+  NY: total=430554, valid=430554, rejected=0
   TX: total=1144277, valid=1144277, rejected=0
