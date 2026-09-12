@@ -187,7 +187,7 @@ This structure gives Power BI a clean analytical model with dimensions filtering
 
 Lender names are handled as reference enrichment rather than as part of the HMDA LAR ingestion path because the public LAR files contain LEI values but do not contain institution names. The enrichment process uses official HMDA/FFIEC/CFPB institution metadata, stores the result as nullable `lender_name`, and keeps LEI as the stable business identifier.
 
-Power BI uses a `Lender Display` fallback so matched lenders show their official name while unmatched lenders continue to display the LEI. The project does not invent lender names for unmatched LEIs.
+The current warehouse has 3,783 lenders. Official metadata matched 3,712 lender names, while 71 unmatched lenders fall back to LEI, for 98.12% lender-name coverage. Power BI uses a `Lender Display` fallback so matched lenders show their official name while unmatched lenders continue to display the LEI. The project does not invent lender names for unmatched LEIs.
 
 Business role:
 
@@ -357,18 +357,23 @@ Measures are kept numeric where possible so visual-level display units can contr
 
 ## 21. Existing Power BI pages
 
-The existing Power BI report includes:
+The existing Power BI report includes six pages:
 
 1. Lending Executive Overview.
 2. Approval & Denial Analysis.
+3. Multi-Year Lending Trends.
+4. State Comparison.
+5. Lender Performance.
+6. Borrower Segmentation.
 
-The Executive Overview is designed for leadership-level monitoring, with KPIs and high-level breakdowns. The Approval & Denial Analysis page is more diagnostic, focused on lending outcomes and rate-based comparisons.
+The Executive Overview is designed for leadership-level monitoring, with KPIs and high-level breakdowns. The Approval & Denial Analysis page is more diagnostic, focused on lending outcomes and rate-based comparisons. Multi-Year Lending Trends shows 2023-2025 movement across the five states. State Comparison benchmarks state-level volume, rates, loan amount, income, and loan mix. Lender Performance uses the enriched `Lender Display` field for human-readable lender benchmarking. Borrower Segmentation analyzes income-band, race, sex, state, and loan-purpose patterns.
 
 Several report refinements were made during development:
 
 - Replaced raw action and loan-purpose codes with business-readable labels.
 - Used county names when deterministically available.
-- Kept lender LEIs where lender names were not present.
+- Added five-state state display and safe county labeling for the expanded warehouse.
+- Added lender-name display logic with fallback to LEI where official names are not available.
 - Fixed display units so application volume renders as values such as `1.16M` instead of malformed suffixes.
 - Removed QA-only measures from executive visuals.
 - Reworked visual titles into business language.
@@ -385,6 +390,9 @@ The project surfaced several realistic data engineering and BI issues:
 - PostgreSQL median compatibility: `MEDIAN()` was not valid PostgreSQL syntax in this environment.
 - Static validation count: validation hard-coded the California-only 1,161,292 expected rows.
 - Duplicate validation null behavior: duplicate-source-row validation returned `NULL` when no duplicates existed.
+- California-only county mapping: the Power BI county label originally assumed California-only FIPS logic and had to be made safe for the five-state model.
+- Stale Power BI expected row count: the semantic-model validation measure still referenced the California-only row count after the warehouse expanded.
+- Lender LEI readability: the LAR source did not contain lender names, so lender visuals initially exposed raw LEIs.
 - Power BI numeric formatting: semantic-model suffix formatting caused malformed labels such as duplicated `M` and `K` suffixes.
 - PBIR schema issue: an unsupported `$id` property caused a Power BI schema error in a visual object.
 - Custom visual mismatch: a chart type was treated as unavailable, requiring replacement with a built-in Power BI visual.
@@ -404,6 +412,12 @@ The PostgreSQL `MEDIAN()` issue was diagnosed by running the view file against P
 The validation hard-code was diagnosed after the warehouse expanded beyond California. The fix made row-count validation compare staging and fact dynamically.
 
 The duplicate validation issue was diagnosed from SQL behavior: an aggregate over no duplicate groups could produce no row or null-like behavior. The fix wrapped duplicate counts in a `COALESCE` expression that returns integer zero.
+
+The California-only county-label issue was diagnosed during the Power BI expansion to five states. The fix changed the semantic-model display logic to avoid California-only FIPS assumptions and use safe five-state county labels with an explicit unknown fallback.
+
+The stale Power BI expected-row measure was diagnosed by comparing the semantic model to the finalized 12,006,526-row warehouse. The fix updated the validation measure while preserving the variance logic.
+
+The lender readability issue was diagnosed by auditing the LAR fields and confirming that the source files contain LEIs but not lender names. The fix added a separate official HMDA/FFIEC/CFPB metadata enrichment process and Power BI `Lender Display` fallback logic.
 
 The Power BI formatting issues were diagnosed by inspecting rendered visuals and PBIR JSON. The fix kept measures numeric with plain model formats and moved display units to individual visuals.
 
@@ -449,7 +463,11 @@ Current verified project state:
 - Staging-to-fact reconciliation difference: 0.
 - ETL pipeline status: completed successfully.
 - PostgreSQL views status: created successfully.
-- BI layer: Power BI PBIP semantic model and dashboards.
+- Lenders in `dim_lender`: 3,783.
+- Official lender names matched: 3,712.
+- LEI fallback lenders: 71.
+- Lender-name coverage: 98.12%.
+- BI layer: Power BI PBIP semantic model and six dashboard pages.
 
 ## 26. Evolution from one state to multiple states and years
 
@@ -478,11 +496,10 @@ This changed the project from a single-state dashboard into a scalable warehouse
 
 Planned next steps:
 
-- Add richer lender names if a reliable source field or enrichment table is introduced.
-- Build the remaining Power BI analytical pages.
 - Add a dedicated validation or QA report page for warehouse checks.
-- Continue improving business-readable labels and slicers.
-- Expand executive and diagnostic reporting without changing the validated warehouse grain.
+- Capture final dashboard screenshots for portfolio presentation.
+- Add optional geography/risk and map-based analysis after validating map design and geographic aggregation.
+- Continue polishing documentation and interview artifacts as the portfolio presentation evolves.
 
 These are planned enhancements, not completed claims.
 
@@ -496,6 +513,8 @@ Useful talking points:
 - The PostgreSQL load path was optimized with native `COPY FROM STDIN`, improving a 100,000-row benchmark from roughly 18 minutes to under 10 seconds.
 - The star schema separates business dimensions from the central application fact table.
 - Validation is dynamic and reconciles the current warehouse instead of relying on hard-coded row counts.
+- Official lender-name enrichment improved report readability for 3,712 of 3,783 lenders, with unmatched lenders safely falling back to LEI.
+- The Power BI layer includes six analytical pages covering executive KPIs, outcome diagnostics, multi-year trends, state comparison, lender performance, and borrower segmentation.
 - The project includes documented bugs, diagnosis, fixes, and regression tests.
 - Power BI measures were kept numeric and reusable, with formatting handled at the visual layer.
 
@@ -505,7 +524,7 @@ This project is an end-to-end lending analytics warehouse and Power BI dashboard
 
 The pipeline discovers raw HMDA files using both per-state and yearly multi-state naming conventions, processes them in pandas chunks, separates rejected rows, writes a consolidated Parquet layer, and bulk-loads PostgreSQL staging using `COPY FROM STDIN`. I then populate a star schema with lender, geography, loan, applicant profile, and action-taken dimensions around a loan application fact table.
 
-The project includes dynamic warehouse validation, analytical SQL views, and a Power BI PBIP semantic model with executive and denial-analysis pages. A major performance improvement was replacing slow SQLAlchemy inserts with PostgreSQL COPY, reducing a 100,000-row staging benchmark from roughly 18 minutes to 9.788 seconds. The current warehouse reconciles 12,006,526 staging rows to 12,006,526 fact rows with zero duplicate source rows, zero unmatched dimension keys, and zero staging-to-fact difference.
+The project includes dynamic warehouse validation, analytical SQL views, official lender-name enrichment, and a Power BI PBIP semantic model with six dashboard pages: executive overview, approval and denial analysis, multi-year trends, state comparison, lender performance, and borrower segmentation. A major performance improvement was replacing slow SQLAlchemy inserts with PostgreSQL COPY, reducing a 100,000-row staging benchmark from roughly 18 minutes to 9.788 seconds. The current warehouse reconciles 12,006,526 staging rows to 12,006,526 fact rows with zero duplicate source rows, zero unmatched dimension keys, and zero staging-to-fact difference.
 
 ## 30. Example STAR-format answer
 
@@ -517,4 +536,4 @@ Task: I needed to make the pipeline scalable and trustworthy without changing th
 
 Action: I benchmarked the staging load and found that pandas and SQLAlchemy multi-row inserts were the bottleneck. A 100,000-row test was taking roughly 18 minutes. I replaced that path with PostgreSQL native `COPY FROM STDIN` using the existing SQLAlchemy and psycopg2 connection, while preserving batch processing, generated staging IDs, load timestamps, profile hashes, explicit column order, and null handling. I also redesigned validation to compare staging and fact dynamically instead of using a hard-coded California count, and added support for yearly multi-state ingestion without double-counting same-year per-state files. Along the way, I fixed a geography edge case where a Texas row had a null county but a valid census tract, making dimension and fact normalization consistent.
 
-Result: The optimized COPY benchmark loaded 100,000 rows in 9.788 seconds at about 10,216 rows per second. The completed warehouse validates 12,006,526 staging rows against 12,006,526 fact rows for the 2023–2025 five-state scope, with zero duplicate source rows, zero unmatched dimension keys, and zero reconciliation difference. The result is a scalable PostgreSQL warehouse and Power BI model with a completed three-year analytical foundation.
+Result: The optimized COPY benchmark loaded 100,000 rows in 9.788 seconds at about 10,216 rows per second. The completed warehouse validates 12,006,526 staging rows against 12,006,526 fact rows for the 2023–2025 five-state scope, with zero duplicate source rows, zero unmatched dimension keys, and zero reconciliation difference. The result is a scalable PostgreSQL warehouse and Power BI model with a completed three-year analytical foundation, official lender-name enrichment, and six dashboard pages for portfolio presentation.
