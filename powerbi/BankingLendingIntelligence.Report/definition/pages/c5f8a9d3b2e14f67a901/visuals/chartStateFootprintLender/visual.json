@@ -1,0 +1,21 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "chartStateFootprintLender",
+  "position": { "x": 360, "y": 835, "z": 5302, "height": 215, "width": 735, "tabOrder": 5302 },
+  "visual": {
+    "visualType": "barChart",
+    "query": {
+      "queryState": {
+        "Category": { "projections": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics dim_lender" } }, "Property": "Lender Display" } }, "queryRef": "analytics dim_lender.Lender Display", "nativeQueryRef": "Lender" } ] },
+        "Series": { "projections": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics dim_geography" } }, "Property": "State Display" } }, "queryRef": "analytics dim_geography.State Display", "nativeQueryRef": "State" } ] },
+        "Y": { "projections": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Application Volume Top 10 Lenders" } }, "queryRef": "analytics fact_loan_application.Application Volume Top 10 Lenders", "nativeQueryRef": "Applications" } ] }
+      },
+      "sortDefinition": { "sort": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Application Volume Top 10 Lenders" } }, "direction": "Descending" } ], "isDefaultSort": true }
+    },
+    "visualContainerObjects": {
+      "title": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'State footprint by lender'" } } } } } ],
+      "subTitle": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Top 10 by application volume'" } } } } } ]
+    },
+    "drillFilterOtherVisuals": true
+  }
+}

@@ -313,6 +313,44 @@ table 'analytics fact_loan_application'
 		displayFolder: Multi-Year Lending Trends
 		lineageTag: 51c2e4da-f078-467c-a9f9-16c9a45cf745
 
+	measure 'Lender Application Volume Rank' = ```
+			RANKX(
+			    ALLSELECTED('analytics dim_lender'[Lender Display]),
+			    [Application Volume],
+			    ,
+			    DESC,
+			    DENSE
+			)
+			```
+		formatString: 0
+		displayFolder: Lender Performance
+		lineageTag: 253f0817-62b0-4c72-9341-081f6e4b3ae5
+
+	measure 'Application Volume Top 15 Lenders' = IF([Lender Application Volume Rank] <= 15, [Application Volume])
+		formatString: #,0
+		displayFolder: Lender Performance
+		lineageTag: b9fba33f-7e8a-4cc2-8db5-c82bfc2b2f8a
+
+	measure 'Application Volume Top 10 Lenders' = IF([Lender Application Volume Rank] <= 10, [Application Volume])
+		formatString: #,0
+		displayFolder: Lender Performance
+		lineageTag: cfb70316-e6bd-4f00-b633-d1453df8ef49
+
+	measure 'Origination Rate Top 15 Lenders' = IF([Lender Application Volume Rank] <= 15, [Origination Rate])
+		formatString: 0.0%
+		displayFolder: Lender Performance
+		lineageTag: 81bb88a8-963e-4b1f-b1b9-5624419406fc
+
+	measure 'Denial Rate Top 15 Lenders' = IF([Lender Application Volume Rank] <= 15, [Denial Rate])
+		formatString: 0.0%
+		displayFolder: Lender Performance
+		lineageTag: 9cc911f7-6104-41c0-92e6-e4b554258bd8
+
+	measure 'Average Originated Loan Amount Top 15 Lenders' = IF([Lender Application Volume Rank] <= 15, [Average Originated Loan Amount])
+		formatString: "$#,0;($#,0);$#,0"
+		displayFolder: Lender Performance
+		lineageTag: cddc1162-ebd4-40c9-8ee1-3a98a266709c
+
 	measure 'Total Loan Amount' = SUM('analytics fact_loan_application'[loan_amount])
 		formatString: "$#,0;($#,0);$#,0"
 		displayFolder: Executive Overview

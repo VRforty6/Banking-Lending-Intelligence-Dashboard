@@ -1,0 +1,11 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "name": "kpiAvgLoanAmount",
+  "position": { "x": 1284, "y": 75, "z": 5103, "height": 120, "width": 284, "tabOrder": 5103 },
+  "visual": {
+    "visualType": "cardVisual",
+    "query": { "queryState": { "Data": { "projections": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Average Originated Loan Amount" } }, "queryRef": "analytics fact_loan_application.Average Originated Loan Amount", "nativeQueryRef": "Average Originated Loan Amount" } ] } } },
+    "visualContainerObjects": { "title": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Avg Loan Amount'" } } } } } ] },
+    "drillFilterOtherVisuals": true
+  }
+}
