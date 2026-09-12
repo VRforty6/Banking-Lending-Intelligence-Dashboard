@@ -186,16 +186,31 @@ The pipeline discovers raw HMDA files using both per-state and yearly multi-stat
 
 The project includes dynamic validation, PostgreSQL analytics views, official lender-name enrichment, and a Power BI PBIP report with six analytical pages. A major performance win was replacing slow SQLAlchemy inserts with PostgreSQL COPY, which loaded 100,000 rows in 9.788 seconds. The final warehouse reconciles 12,006,526 staging rows to 12,006,526 fact rows with zero duplicate source rows, zero unmatched dimension keys, and zero staging-to-fact difference.
 
-## Screenshots to Capture Later
+## Dashboard Preview
 
-No dashboard screenshots are currently added to this README. The six screenshots to capture later are:
+**Lending Executive Overview** - executive KPIs, outcome mix, top counties, and top lenders.
 
-1. Lending Executive Overview.
-2. Approval & Denial Analysis.
-3. Multi-Year Lending Trends.
-4. State Comparison.
-5. Lender Performance.
-6. Borrower Segmentation.
+![Lending Executive Overview](docs/screenshots/01-executive-overview.png)
+
+**Approval & Denial Analysis** - diagnostic view of decision outcomes and denial-rate patterns.
+
+![Approval & Denial Analysis](docs/screenshots/02-approval-denial-analysis.png)
+
+**Multi-Year Lending Trends** - 2023-2025 volume and outcome trends across the five-state warehouse.
+
+![Multi-Year Lending Trends](docs/screenshots/03-multi-year-trends.png)
+
+**State Comparison** - state-level comparison of volume, outcomes, borrower profile, and loan mix.
+
+![State Comparison](docs/screenshots/04-state-comparison.png)
+
+**Lender Performance** - top lender benchmarking with enriched lender-name display.
+
+![Lender Performance](docs/screenshots/05-lender-performance.png)
+
+**Borrower Segmentation** - borrower outcome and volume patterns by income, sex, race, state, and loan purpose.
+
+![Borrower Segmentation](docs/screenshots/06-borrower-segmentation.png)
 
 ## Dataset Storage
 
