@@ -32,3 +32,17 @@ Counts by state:
   IL: total=1221850, valid=1221850, rejected=0
   NY: total=1205742, valid=1205742, rejected=0
   TX: total=3260867, valid=3260867, rejected=0
+
+Pipeline status:
+  ETL pipeline completed successfully
+  PostgreSQL views created successfully
+
+PostgreSQL warehouse validation:
+  Staging row count: actual=12006526, expected=12006526, status=PASS
+  Fact row count: actual=12006526, expected=12006526, status=PASS
+  Duplicate source rows in staging: actual=0, expected=0, status=PASS
+  Null mandatory keys in fact: actual=0, expected=0, status=PASS
+  Invalid action codes in fact: actual=0, expected=0, status=PASS
+  Invalid loan amounts (non-positive) in fact: actual=0, expected=0, status=PASS
+  Unmatched dimension keys in fact: actual=0, expected=0, status=PASS
+  Staging-to-fact reconciliation: actual=0, expected=0, status=PASS
