@@ -296,6 +296,63 @@ def test_multi_file_discovery_supported_scope(tmp_path):
     ]
 
 
+def test_multi_state_file_discovery_supported_scope(tmp_path):
+    """Discover yearly multi-state HMDA extracts."""
+    raw_dir = tmp_path / "raw"
+    raw_dir.mkdir()
+    (raw_dir / "hmda_2023_multi_state.csv").write_text(
+        "activity_year,state_code\n",
+        encoding="utf-8",
+    )
+
+    discovered = discover_hmda_files(raw_dir)
+
+    assert [source.path.name for source in discovered] == [
+        "hmda_2023_multi_state.csv"
+    ]
+    assert discovered[0].year == 2023
+    assert discovered[0].state is None
+    assert discovered[0].is_multi_state
+
+
+def test_multi_state_and_per_state_different_years_can_coexist(tmp_path):
+    """Allow different-year coverage without duplicate ingestion ambiguity."""
+    raw_dir = tmp_path / "raw"
+    raw_dir.mkdir()
+    (raw_dir / "hmda_2023_multi_state.csv").write_text(
+        "activity_year,state_code\n",
+        encoding="utf-8",
+    )
+    (raw_dir / "hmda_2024_CA.csv").write_text(
+        "activity_year,state_code\n",
+        encoding="utf-8",
+    )
+
+    discovered = discover_hmda_files(raw_dir)
+
+    assert [source.path.name for source in discovered] == [
+        "hmda_2023_multi_state.csv",
+        "hmda_2024_CA.csv",
+    ]
+
+
+def test_multi_state_and_per_state_same_year_fails_ambiguously(tmp_path):
+    """Fail clearly instead of double-ingesting the same year coverage."""
+    raw_dir = tmp_path / "raw"
+    raw_dir.mkdir()
+    (raw_dir / "hmda_2023_multi_state.csv").write_text(
+        "activity_year,state_code\n",
+        encoding="utf-8",
+    )
+    (raw_dir / "hmda_2023_CA.csv").write_text(
+        "activity_year,state_code\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="Ambiguous HMDA raw file coverage"):
+        discover_hmda_files(raw_dir)
+
+
 def test_discovery_fails_for_unsupported_state_year_file(tmp_path):
     """Do not silently ignore convention-matching files outside supported scope."""
     raw_dir = tmp_path / "raw"
@@ -356,6 +413,97 @@ def test_multi_file_consolidation_and_reconciliation(tmp_path):
     assert set(clean_df["state_code"]) == {"CA", "TX"}
     assert "rejection_reason" not in clean_df.columns
     assert "rejection_reason" in rejected_df.columns
+
+
+def test_valid_five_state_multi_state_file_consolidates(tmp_path):
+    """Process one yearly multi-state file without physical file splitting."""
+    raw_dir = tmp_path / "raw"
+    output_dir = tmp_path / "processed"
+    raw_dir.mkdir()
+    (raw_dir / "hmda_2023_multi_state.csv").write_text(
+        "activity_year,state_code,action_taken,loan_amount,income,lei\n"
+        "2023,CA,1,100000,50,LEI-CA-1\n"
+        "2023,TX,2,110000,55,LEI-TX-1\n"
+        "2023,FL,3,120000,60,LEI-FL-1\n"
+        "2023,NY,4,130000,65,LEI-NY-1\n"
+        "2023,IL,5,140000,70,LEI-IL-1\n",
+        encoding="utf-8",
+    )
+
+    result = etl_hmda(raw_dir, output_dir, chunksize=2)
+
+    assert result["total_rows_processed"] == 5
+    assert result["valid_rows"] == 5
+    assert result["rejected_rows"] == 0
+    assert result["reconciliation_difference"] == 0
+    assert result["counts_by_source_file"] == {
+        "hmda_2023_multi_state.csv": {
+            "total_rows": 5,
+            "valid_rows": 5,
+            "rejected_rows": 0,
+        }
+    }
+    assert result["counts_by_year"] == {
+        2023: {"total_rows": 5, "valid_rows": 5, "rejected_rows": 0}
+    }
+    assert result["counts_by_state"] == {
+        state: {"total_rows": 1, "valid_rows": 1, "rejected_rows": 0}
+        for state in ["CA", "FL", "IL", "NY", "TX"]
+    }
+
+    clean_df = pd.read_parquet(output_dir / "hmda_clean.parquet")
+    assert len(clean_df) == 5
+    assert set(clean_df["activity_year"]) == {2023}
+    assert set(clean_df["state_code"]) == {"CA", "TX", "FL", "NY", "IL"}
+
+
+def test_multi_state_filename_activity_year_mismatch_fails_clearly(tmp_path):
+    """Fail when a multi-state file contains the wrong year."""
+    raw_dir = tmp_path / "raw"
+    output_dir = tmp_path / "processed"
+    raw_dir.mkdir()
+    (raw_dir / "hmda_2024_multi_state.csv").write_text(
+        "activity_year,state_code,action_taken,loan_amount,income,lei\n"
+        "2023,CA,1,100000,50,LEI-CA-1\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="activity_year values"):
+        etl_hmda(raw_dir, output_dir, chunksize=1)
+
+
+def test_multi_state_unsupported_state_fails_clearly(tmp_path):
+    """Fail when a multi-state file contains a state outside supported scope."""
+    raw_dir = tmp_path / "raw"
+    output_dir = tmp_path / "processed"
+    raw_dir.mkdir()
+    (raw_dir / "hmda_2024_multi_state.csv").write_text(
+        "activity_year,state_code,action_taken,loan_amount,income,lei\n"
+        "2024,CA,1,100000,50,LEI-CA-1\n"
+        "2024,GA,1,100000,50,LEI-GA-1\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="unsupported state_code values"):
+        etl_hmda(raw_dir, output_dir, chunksize=2)
+
+
+def test_multi_state_missing_expected_state_fails_clearly(tmp_path):
+    """Fail when a multi-state file omits one of the expected five states."""
+    raw_dir = tmp_path / "raw"
+    output_dir = tmp_path / "processed"
+    raw_dir.mkdir()
+    (raw_dir / "hmda_2024_multi_state.csv").write_text(
+        "activity_year,state_code,action_taken,loan_amount,income,lei\n"
+        "2024,CA,1,100000,50,LEI-CA-1\n"
+        "2024,TX,1,110000,55,LEI-TX-1\n"
+        "2024,FL,1,120000,60,LEI-FL-1\n"
+        "2024,NY,1,130000,65,LEI-NY-1\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="missing expected state_code values"):
+        etl_hmda(raw_dir, output_dir, chunksize=2)
 
 
 def test_filename_activity_year_mismatch_fails_clearly(tmp_path):

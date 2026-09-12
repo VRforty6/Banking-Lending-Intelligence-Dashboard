@@ -12,6 +12,9 @@ from src import config
 
 
 HMDA_FILE_RE = re.compile(r"^hmda_(?P<year>\d{4})_(?P<state>[A-Za-z]{2})\.csv$")
+HMDA_MULTI_STATE_FILE_RE = re.compile(
+    r"^hmda_(?P<year>\d{4})_multi_state\.csv$", re.IGNORECASE
+)
 NA_VALUES = ["", "NA", "N/A", "Exempt", "nan", "<NA>"]
 
 
@@ -19,12 +22,22 @@ NA_VALUES = ["", "NA", "N/A", "Exempt", "nan", "<NA>"]
 class HmdaSourceFile:
     path: Path
     year: int
-    state: str
+    state: Optional[str]
+    is_multi_state: bool = False
 
 
 def parse_hmda_filename(path: Union[str, Path]) -> Optional[HmdaSourceFile]:
-    """Parse hmda_<YEAR>_<STATE>.csv names, returning None for other names."""
+    """Parse supported HMDA CSV names, returning None for other names."""
     path = Path(path)
+    multi_match = HMDA_MULTI_STATE_FILE_RE.match(path.name)
+    if multi_match:
+        return HmdaSourceFile(
+            path=path,
+            year=int(multi_match.group("year")),
+            state=None,
+            is_multi_state=True,
+        )
+
     match = HMDA_FILE_RE.match(path.name)
     if not match:
         return None
@@ -41,7 +54,7 @@ def discover_hmda_files(
     supported_states: set[str] = config.SUPPORTED_STATES,
 ) -> List[HmdaSourceFile]:
     """
-    Discover supported HMDA raw CSVs using hmda_<YEAR>_<STATE>.csv names.
+    Discover supported HMDA raw CSVs using supported production file names.
 
     Files that follow the naming convention but fall outside the supported scope
     fail clearly so an operator does not accidentally skip a state-year extract.
@@ -56,7 +69,9 @@ def discover_hmda_files(
         source = parse_hmda_filename(path)
         if source is None:
             continue
-        if source.year not in valid_years or source.state not in supported_states:
+        if source.year not in valid_years or (
+            not source.is_multi_state and source.state not in supported_states
+        ):
             unsupported.append(path.name)
             continue
         discovered.append(source)
@@ -66,13 +81,29 @@ def discover_hmda_files(
             "Unsupported HMDA raw file(s): "
             + ", ".join(unsupported)
             + f". Supported years: {sorted(valid_years)}; "
-            + f"supported states: {sorted(supported_states)}"
+            + f"supported states: {sorted(supported_states)}; "
+            + "multi-state files must use hmda_<YEAR>_multi_state.csv"
         )
 
     if not discovered:
         raise FileNotFoundError(
             f"No supported HMDA CSV files found in {raw_dir} using "
-            "hmda_<YEAR>_<STATE>.csv"
+            "hmda_<YEAR>_<STATE>.csv or hmda_<YEAR>_multi_state.csv"
+        )
+
+    multi_state_years = {source.year for source in discovered if source.is_multi_state}
+    ambiguous_years = sorted(
+        {
+            source.year
+            for source in discovered
+            if not source.is_multi_state and source.year in multi_state_years
+        }
+    )
+    if ambiguous_years:
+        raise ValueError(
+            "Ambiguous HMDA raw file coverage: multi-state and per-state files "
+            f"both exist for year(s) {ambiguous_years}. Remove one coverage type "
+            "to avoid duplicate ingestion."
         )
 
     return discovered
@@ -88,10 +119,25 @@ def _update_bucket(bucket: Dict[str, int], total: int, valid: int, rejected: int
     bucket["rejected_rows"] += rejected
 
 
+def _state_counts(df: pd.DataFrame) -> Dict[str, int]:
+    if "state_code" not in df.columns or df.empty:
+        return {}
+    return (
+        df["state_code"]
+        .astype("string")
+        .str.strip()
+        .str.upper()
+        .value_counts()
+        .astype(int)
+        .to_dict()
+    )
+
+
 def validate_source_metadata(
     df: pd.DataFrame,
     source: HmdaSourceFile,
     chunk_num: int,
+    supported_states: set[str] = config.SUPPORTED_STATES,
 ) -> None:
     """
     Ensure activity_year and state_code agree with the source filename.
@@ -123,6 +169,23 @@ def validate_source_metadata(
         )
 
     state_values = df["state_code"].astype("string").str.strip().str.upper()
+    if source.is_multi_state:
+        bad_state_mask = state_values.isna() | ~state_values.isin(supported_states)
+        if bad_state_mask.any():
+            sample = (
+                df.loc[bad_state_mask, "state_code"]
+                .astype("string")
+                .drop_duplicates()
+                .head(5)
+                .tolist()
+            )
+            raise ValueError(
+                f"{source.path.name} chunk {chunk_num} has unsupported state_code "
+                f"values for a multi-state file: {sample}. Supported states: "
+                f"{sorted(supported_states)}"
+            )
+        return
+
     bad_state_mask = state_values.isna() | (state_values != source.state)
     if bad_state_mask.any():
         sample = (
@@ -135,6 +198,23 @@ def validate_source_metadata(
         raise ValueError(
             f"{source.path.name} chunk {chunk_num} has state_code values "
             f"that do not match filename state {source.state}: {sample}"
+        )
+
+
+def validate_multi_state_coverage(
+    source: HmdaSourceFile,
+    states_seen: set[str],
+    supported_states: set[str] = config.SUPPORTED_STATES,
+) -> None:
+    """Ensure a multi-state source contains every expected supported state."""
+    if not source.is_multi_state:
+        return
+
+    missing_states = sorted(supported_states - states_seen)
+    if missing_states:
+        raise ValueError(
+            f"{source.path.name} is missing expected state_code values for a "
+            f"multi-state file: {missing_states}"
         )
 
 
@@ -300,11 +380,14 @@ def etl_hmda(
     elif input_path.is_file():
         source = parse_hmda_filename(input_path)
         if source is not None:
-            if source.year not in config.VALID_YEARS or source.state not in config.SUPPORTED_STATES:
+            if source.year not in config.VALID_YEARS or (
+                not source.is_multi_state and source.state not in config.SUPPORTED_STATES
+            ):
                 raise ValueError(
                     f"Unsupported HMDA raw file: {input_path.name}. "
                     f"Supported years: {sorted(config.VALID_YEARS)}; "
-                    f"supported states: {sorted(config.SUPPORTED_STATES)}"
+                    f"supported states: {sorted(config.SUPPORTED_STATES)}; "
+                    "multi-state files must use hmda_<YEAR>_multi_state.csv"
                 )
         sources = [(input_path, source)]
     else:
@@ -330,6 +413,8 @@ def etl_hmda(
 
     try:
         for source_path, source_metadata in sources:
+            source_states_seen: set[str] = set()
+
             # Read CSV in chunks. Read all columns as string to prevent
             # per-chunk dtype inference and keep RAM bounded.
             for chunk_num, chunk in enumerate(
@@ -350,6 +435,8 @@ def etl_hmda(
 
                 if source_metadata is not None:
                     validate_source_metadata(cleaned_chunk, source_metadata, chunk_num)
+                    if source_metadata.is_multi_state:
+                        source_states_seen.update(_state_counts(cleaned_chunk))
 
                 # Validate the chunk
                 valid_chunk, rejected_chunk, chunk_counts = validate_chunk(cleaned_chunk)
@@ -376,12 +463,24 @@ def etl_hmda(
                         valid_count,
                         rejected_count,
                     )
-                    _update_bucket(
-                        counts_by_state[source_metadata.state],
-                        input_count,
-                        valid_count,
-                        rejected_count,
-                    )
+                    if source_metadata.is_multi_state:
+                        total_state_counts = _state_counts(cleaned_chunk)
+                        valid_state_counts = _state_counts(valid_chunk)
+                        rejected_state_counts = _state_counts(rejected_chunk)
+                        for state in sorted(total_state_counts):
+                            _update_bucket(
+                                counts_by_state[state],
+                                total_state_counts.get(state, 0),
+                                valid_state_counts.get(state, 0),
+                                rejected_state_counts.get(state, 0),
+                            )
+                    else:
+                        _update_bucket(
+                            counts_by_state[source_metadata.state],
+                            input_count,
+                            valid_count,
+                            rejected_count,
+                        )
 
                 # Write valid chunk to Parquet
                 if valid_count > 0:
@@ -410,6 +509,9 @@ def etl_hmda(
                             table, rejected_writer, "rejected"
                         )
                     rejected_writer.write_table(table)
+
+            if source_metadata is not None:
+                validate_multi_state_coverage(source_metadata, source_states_seen)
 
     finally:
         # Ensure writers are closed
