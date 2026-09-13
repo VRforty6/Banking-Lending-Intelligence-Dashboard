@@ -11,6 +11,25 @@ duplicate_source_rows AS (
         GROUP BY stg_row_id
         HAVING COUNT(*) > 1
     ) duplicates
+) ,
+fact_mapping_checks AS (
+    SELECT
+        (SELECT COALESCE(SUM(n - 1), 0) FROM (
+            SELECT COUNT(*) AS n FROM analytics.fact_loan_application
+            GROUP BY source_row_id HAVING COUNT(*) > 1
+        ) duplicates) AS duplicate_fact_mappings,
+        (SELECT COUNT(*) FROM staging.hmda_raw s WHERE NOT EXISTS (
+            SELECT 1 FROM analytics.fact_loan_application f
+            WHERE f.source_row_id = s.stg_row_id
+        )) AS missing_fact_mappings,
+        (SELECT COUNT(*) FROM analytics.fact_loan_application f WHERE NOT EXISTS (
+            SELECT 1 FROM staging.hmda_raw s WHERE s.stg_row_id = f.source_row_id
+        )) AS unknown_source_mappings,
+        (SELECT COUNT(*) FROM analytics.fact_loan_application f
+         JOIN staging.hmda_raw s ON s.stg_row_id = f.source_row_id
+         WHERE f.application_year IS DISTINCT FROM s.activity_year
+            OR f.loan_amount IS DISTINCT FROM s.loan_amount
+            OR f.income IS DISTINCT FROM s.income) AS mismatched_fact_values
 )
 SELECT
     'Staging row count' AS check,
@@ -27,7 +46,7 @@ SELECT
 FROM warehouse_counts
 UNION ALL
 SELECT
-    'Duplicate source rows in staging' AS check,
+    'Duplicate staging row IDs (key integrity)' AS check,
     duplicate_count AS actual_count,
     0 AS expected_count,
     CASE WHEN duplicate_count = 0 THEN 'PASS' ELSE 'FAIL' END AS status
@@ -79,4 +98,24 @@ SELECT
     'Staging-to-fact reconciliation' AS check,
     (SELECT COUNT(*) FROM staging.hmda_raw) - (SELECT COUNT(*) FROM analytics.fact_loan_application) AS actual_count,
     0 AS expected_count,
-    CASE WHEN (SELECT COUNT(*) FROM staging.hmda_raw) - (SELECT COUNT(*) FROM analytics.fact_loan_application) = 0 THEN 'PASS' ELSE 'FAIL' END AS status;
+    CASE WHEN (SELECT COUNT(*) FROM staging.hmda_raw) - (SELECT COUNT(*) FROM analytics.fact_loan_application) = 0 THEN 'PASS' ELSE 'FAIL' END AS status
+UNION ALL
+SELECT 'Non-empty staging', staging_count, 1,
+       CASE WHEN staging_count > 0 THEN 'PASS' ELSE 'FAIL' END
+FROM warehouse_counts
+UNION ALL
+SELECT 'Duplicate fact source-row mappings', duplicate_fact_mappings, 0,
+       CASE WHEN duplicate_fact_mappings = 0 THEN 'PASS' ELSE 'FAIL' END
+FROM fact_mapping_checks
+UNION ALL
+SELECT 'Staging rows missing fact mappings', missing_fact_mappings, 0,
+       CASE WHEN missing_fact_mappings = 0 THEN 'PASS' ELSE 'FAIL' END
+FROM fact_mapping_checks
+UNION ALL
+SELECT 'Fact mappings to unknown staging rows', unknown_source_mappings, 0,
+       CASE WHEN unknown_source_mappings = 0 THEN 'PASS' ELSE 'FAIL' END
+FROM fact_mapping_checks
+UNION ALL
+SELECT 'Fact/source value mismatches', mismatched_fact_values, 0,
+       CASE WHEN mismatched_fact_values = 0 THEN 'PASS' ELSE 'FAIL' END
+FROM fact_mapping_checks;
