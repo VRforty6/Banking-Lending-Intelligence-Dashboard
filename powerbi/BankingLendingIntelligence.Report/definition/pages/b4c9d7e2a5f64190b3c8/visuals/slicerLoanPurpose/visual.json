@@ -1,13 +1,73 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "slicerLoanPurpose",
-  "position": { "x": 40, "y": 185, "z": 4001, "height": 230, "width": 280, "tabOrder": 4001 },
+  "position": {
+    "x": 40,
+    "y": 185,
+    "z": 4001,
+    "height": 230,
+    "width": 280,
+    "tabOrder": 4001
+  },
   "visual": {
     "visualType": "slicer",
-    "query": { "queryState": { "Values": { "projections": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics dim_loan" } }, "Property": "Loan Purpose Label" } }, "queryRef": "analytics dim_loan.Loan Purpose Label", "nativeQueryRef": "Loan purpose" } ] } } },
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics dim_loan"
+                    }
+                  },
+                  "Property": "Loan Purpose Label"
+                }
+              },
+              "queryRef": "analytics dim_loan.Loan Purpose Label",
+              "nativeQueryRef": "Loan purpose",
+              "active": true
+            }
+          ]
+        }
+      }
+    },
     "visualContainerObjects": {
-      "title": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Loan purpose'" } } } } } ],
-      "subTitle": [ { "properties": { "show": { "expr": { "Literal": { "Value": "false" } } } } } ]
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Loan purpose'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
     },
     "drillFilterOtherVisuals": true
   }

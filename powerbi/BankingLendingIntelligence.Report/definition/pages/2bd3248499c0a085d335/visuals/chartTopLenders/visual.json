@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "chartTopLenders",
   "position": {
-    "x": 960,
-    "y": 630,
+    "x": 970,
+    "y": 565,
     "z": 1201,
-    "height": 390,
-    "width": 880,
+    "height": 475,
+    "width": 910,
     "tabOrder": 1201
   },
   "visual": {
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "analytics dim_lender.Lender Display",
-              "nativeQueryRef": "Lender"
+              "nativeQueryRef": "Lender",
+              "active": true
             }
           ]
         },
@@ -69,42 +70,6 @@
         "isDefaultSort": true
       }
     },
-    "visualContainerObjects": {
-      "title": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "text": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Top lenders by application volume'"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "subTitle": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ]
-    },
-    "drillFilterOtherVisuals": true,
     "objects": {
       "valueAxis": [
         {
@@ -146,6 +111,42 @@
           }
         }
       ]
-    }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Application volume — Top 15 lenders'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
   }
 }

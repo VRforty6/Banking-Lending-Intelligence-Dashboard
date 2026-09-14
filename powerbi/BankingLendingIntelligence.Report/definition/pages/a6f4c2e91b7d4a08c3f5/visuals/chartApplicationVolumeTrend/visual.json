@@ -1,22 +1,150 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "chartApplicationVolumeTrend",
-  "position": { "x": 360, "y": 210, "z": 3200, "height": 320, "width": 740, "tabOrder": 3200 },
+  "position": {
+    "x": 360,
+    "y": 210,
+    "z": 3200,
+    "height": 320,
+    "width": 740,
+    "tabOrder": 3200
+  },
   "visual": {
     "visualType": "lineChart",
     "query": {
       "queryState": {
-        "Category": { "projections": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "application_year" } }, "queryRef": "analytics fact_loan_application.application_year", "nativeQueryRef": "Application year" } ] },
-        "Series": { "projections": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics dim_geography" } }, "Property": "State Display" } }, "queryRef": "analytics dim_geography.State Display", "nativeQueryRef": "State" } ] },
-        "Y": { "projections": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Application Volume" } }, "queryRef": "analytics fact_loan_application.Application Volume", "nativeQueryRef": "Applications" } ] }
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "application_year"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.application_year",
+              "nativeQueryRef": "Application year",
+              "active": true
+            }
+          ]
+        },
+        "Series": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics dim_geography"
+                    }
+                  },
+                  "Property": "State Display"
+                }
+              },
+              "queryRef": "analytics dim_geography.State Display",
+              "nativeQueryRef": "State"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "Application Volume"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.Application Volume",
+              "nativeQueryRef": "Applications"
+            }
+          ]
+        }
       },
-      "sortDefinition": { "sort": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "application_year" } }, "direction": "Ascending" } ], "isDefaultSort": true }
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Column": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "analytics fact_loan_application"
+                  }
+                },
+                "Property": "application_year"
+              }
+            },
+            "direction": "Ascending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "objects": {
+      "valueAxis": [
+        {
+          "properties": {
+            "labelDisplayUnits": {
+              "expr": {
+                "Literal": {
+                  "Value": "1000000D"
+                }
+              }
+            },
+            "labelPrecision": {
+              "expr": {
+                "Literal": {
+                  "Value": "1L"
+                }
+              }
+            }
+          }
+        }
+      ]
     },
     "visualContainerObjects": {
-      "title": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Application volume trend by state'" } } } } } ],
-      "subTitle": [ { "properties": { "show": { "expr": { "Literal": { "Value": "false" } } } } } ]
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Application volume trend by state'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
     },
-    "drillFilterOtherVisuals": true,
-    "objects": { "valueAxis": [ { "properties": { "labelDisplayUnits": { "expr": { "Literal": { "Value": "1000000D" } } }, "labelPrecision": { "expr": { "Literal": { "Value": "1L" } } } } } ] }
+    "drillFilterOtherVisuals": true
   }
 }

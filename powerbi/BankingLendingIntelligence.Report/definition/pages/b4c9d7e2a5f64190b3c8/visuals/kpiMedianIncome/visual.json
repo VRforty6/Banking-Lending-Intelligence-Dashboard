@@ -1,11 +1,88 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
   "name": "kpiMedianIncome",
-  "position": { "x": 1592, "y": 75, "z": 4104, "height": 120, "width": 288, "tabOrder": 4104 },
+  "position": {
+    "x": 1592,
+    "y": 75,
+    "z": 4104,
+    "height": 120,
+    "width": 288,
+    "tabOrder": 4104
+  },
   "visual": {
     "visualType": "cardVisual",
-    "query": { "queryState": { "Data": { "projections": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Median Applicant Income" } }, "queryRef": "analytics fact_loan_application.Median Applicant Income", "nativeQueryRef": "Median Applicant Income" } ] } } },
-    "visualContainerObjects": { "title": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Median applicant income ($K)'" } } } } } ], "subTitle": [ { "properties": { "show": { "expr": { "Literal": { "Value": "false" } } } } } ] },
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "Median Applicant Income"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.Median Applicant Income",
+              "nativeQueryRef": "Median Applicant Income"
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "label": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Median applicant income ($K)'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
     "drillFilterOtherVisuals": true
   }
 }

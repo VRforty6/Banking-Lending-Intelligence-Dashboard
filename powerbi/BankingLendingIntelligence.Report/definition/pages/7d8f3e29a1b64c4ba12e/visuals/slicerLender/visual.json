@@ -1,7 +1,14 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "slicerLender",
-  "position": { "x": 40, "y": 625, "z": 2003, "height": 235, "width": 280, "tabOrder": 2003 },
+  "position": {
+    "x": 40,
+    "y": 625,
+    "z": 2003,
+    "height": 235,
+    "width": 280,
+    "tabOrder": 2003
+  },
   "visual": {
     "visualType": "slicer",
     "query": {
@@ -9,9 +16,19 @@
         "Values": {
           "projections": [
             {
-              "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics dim_lender" } }, "Property": "Lender Display" } },
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics dim_lender"
+                    }
+                  },
+                  "Property": "Lender Display"
+                }
+              },
               "queryRef": "analytics dim_lender.Lender Display",
-              "nativeQueryRef": "Lender"
+              "nativeQueryRef": "Lender",
+              "active": true
             }
           ]
         }
@@ -19,10 +36,37 @@
     },
     "visualContainerObjects": {
       "title": [
-        { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Lender'" } } } } }
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Lender'"
+                }
+              }
+            }
+          }
+        }
       ],
       "subTitle": [
-        { "properties": { "show": { "expr": { "Literal": { "Value": "false" } } } } }
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
       ]
     },
     "drillFilterOtherVisuals": true

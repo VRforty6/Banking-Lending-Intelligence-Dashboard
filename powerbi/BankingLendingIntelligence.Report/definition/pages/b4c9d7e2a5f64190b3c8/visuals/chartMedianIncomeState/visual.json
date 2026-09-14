@@ -1,19 +1,109 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "chartMedianIncomeState",
-  "position": { "x": 360, "y": 775, "z": 4303, "height": 245, "width": 500, "tabOrder": 4303 },
+  "position": {
+    "x": 360,
+    "y": 770,
+    "z": 4303,
+    "height": 275,
+    "width": 500,
+    "tabOrder": 4303
+  },
   "visual": {
     "visualType": "barChart",
     "query": {
       "queryState": {
-        "Category": { "projections": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics dim_geography" } }, "Property": "State Display" } }, "queryRef": "analytics dim_geography.State Display", "nativeQueryRef": "State" } ] },
-        "Y": { "projections": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Median Applicant Income" } }, "queryRef": "analytics fact_loan_application.Median Applicant Income", "nativeQueryRef": "Median Applicant Income" } ] }
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics dim_geography"
+                    }
+                  },
+                  "Property": "State Display"
+                }
+              },
+              "queryRef": "analytics dim_geography.State Display",
+              "nativeQueryRef": "State",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "Median Applicant Income"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.Median Applicant Income",
+              "nativeQueryRef": "Median Applicant Income"
+            }
+          ]
+        }
       },
-      "sortDefinition": { "sort": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Median Applicant Income" } }, "direction": "Descending" } ], "isDefaultSort": true }
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "analytics fact_loan_application"
+                  }
+                },
+                "Property": "Median Applicant Income"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
     },
     "visualContainerObjects": {
-      "title": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Median applicant income by state'" } } } } } ],
-      "subTitle": [ { "properties": { "show": { "expr": { "Literal": { "Value": "false" } } } } } ]
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Median applicant income by state'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
     },
     "drillFilterOtherVisuals": true
   }

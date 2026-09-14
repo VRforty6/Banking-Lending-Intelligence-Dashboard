@@ -1,21 +1,130 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "chartRaceOutcomeRates",
-  "position": { "x": 890, "y": 505, "z": 6301, "height": 240, "width": 990, "tabOrder": 6301 },
+  "position": {
+    "x": 890,
+    "y": 475,
+    "z": 6301,
+    "height": 255,
+    "width": 990,
+    "tabOrder": 6301
+  },
   "visual": {
     "visualType": "clusteredBarChart",
     "query": {
       "queryState": {
-        "Category": { "projections": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics dim_applicant_profile" } }, "Property": "Applicant Race Label" } }, "queryRef": "analytics dim_applicant_profile.Applicant Race Label", "nativeQueryRef": "Applicant race" } ] },
-        "Y": { "projections": [
-          { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Origination Rate" } }, "queryRef": "analytics fact_loan_application.Origination Rate", "nativeQueryRef": "Origination Rate" },
-          { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Denial Rate" } }, "queryRef": "analytics fact_loan_application.Denial Rate", "nativeQueryRef": "Denial Rate" }
-        ] }
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics dim_applicant_profile"
+                    }
+                  },
+                  "Property": "Applicant Race Label"
+                }
+              },
+              "queryRef": "analytics dim_applicant_profile.Applicant Race Label",
+              "nativeQueryRef": "Applicant race",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "Origination Rate"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.Origination Rate",
+              "nativeQueryRef": "Origination Rate"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "Denial Rate"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.Denial Rate",
+              "nativeQueryRef": "Denial Rate"
+            }
+          ]
+        },
+        "Tooltips": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "Credit Decisions"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.Credit Decisions",
+              "nativeQueryRef": "Credit decisions"
+            }
+          ]
+        }
       }
     },
     "visualContainerObjects": {
-      "title": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Origination and denial rates by applicant race'" } } } } } ],
-      "subTitle": [ { "properties": { "show": { "expr": { "Literal": { "Value": "false" } } } } } ]
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Origination and denial rates by applicant race'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Reported applicant race categories; credit decisions in tooltips'"
+                }
+              }
+            }
+          }
+        }
+      ]
     },
     "drillFilterOtherVisuals": true
   }

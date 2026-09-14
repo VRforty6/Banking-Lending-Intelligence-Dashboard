@@ -1,13 +1,88 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "slicerState",
-  "position": { "x": 40, "y": 185, "z": 6001, "height": 175, "width": 280, "tabOrder": 6001 },
+  "position": {
+    "x": 40,
+    "y": 185,
+    "z": 6001,
+    "height": 175,
+    "width": 280,
+    "tabOrder": 6001
+  },
   "visual": {
     "visualType": "slicer",
-    "query": { "queryState": { "Values": { "projections": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics dim_geography" } }, "Property": "State Display" } }, "queryRef": "analytics dim_geography.State Display", "nativeQueryRef": "State" } ] } } },
+    "query": {
+      "queryState": {
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics dim_geography"
+                    }
+                  },
+                  "Property": "State Display"
+                }
+              },
+              "queryRef": "analytics dim_geography.State Display",
+              "nativeQueryRef": "State",
+              "active": true
+            }
+          ]
+        }
+      }
+    },
+    "objects": {
+      "data": [
+        {
+          "properties": {
+            "mode": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Dropdown'"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
     "visualContainerObjects": {
-      "title": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'State'" } } } } } ],
-      "subTitle": [ { "properties": { "show": { "expr": { "Literal": { "Value": "false" } } } } } ]
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'State'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
     },
     "drillFilterOtherVisuals": true
   }

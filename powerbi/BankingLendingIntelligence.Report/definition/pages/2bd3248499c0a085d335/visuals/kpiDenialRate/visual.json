@@ -1,11 +1,11 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "kpiDenialRate",
   "position": {
     "x": 784,
-    "y": 40,
+    "y": 60,
     "z": 1002,
-    "height": 150,
+    "height": 125,
     "width": 352,
     "tabOrder": 1002
   },
@@ -30,8 +30,41 @@
               "nativeQueryRef": "Denial Rate"
             }
           ]
+        },
+        "Tooltips": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "Credit Decisions"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.Credit Decisions",
+              "nativeQueryRef": "Credit decisions"
+            }
+          ]
         }
       }
+    },
+    "objects": {
+      "label": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
     },
     "visualContainerObjects": {
       "title": [
@@ -40,7 +73,7 @@
             "show": {
               "expr": {
                 "Literal": {
-                  "Value": "true"
+                  "Value": "false"
                 }
               }
             },
@@ -68,21 +101,6 @@
         }
       ]
     },
-    "drillFilterOtherVisuals": true,
-    "objects": {
-      "categoryLabels": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ]
-    }
+    "drillFilterOtherVisuals": true
   }
 }
