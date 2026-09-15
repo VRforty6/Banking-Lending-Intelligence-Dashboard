@@ -26,7 +26,7 @@ This project builds the data foundation, validation controls, and Power BI seman
 | Logical state/year combinations | 15 |
 | PostgreSQL staging rows | 12,006,526 |
 | PostgreSQL fact rows | 12,006,526 |
-| Duplicate source rows | 0 |
+| Duplicate staging row IDs (primary-key integrity) | 0 |
 | Unmatched dimension keys | 0 |
 | Staging-to-fact reconciliation difference | 0 |
 | Lenders in `dim_lender` | 3,783 |
@@ -97,7 +97,7 @@ The Python ETL processes raw CSV files sequentially in chunks so memory usage re
 
 The PostgreSQL load process then:
 
-- Truncates and reloads staging for a fresh run.
+- Checks the Parquet input before modifying staging and reloads staging in one transaction; a failed batch rolls back the staging replacement.
 - Generates `stg_row_id`, `load_timestamp`, and `profile_hash`.
 - Uses PostgreSQL `COPY FROM STDIN` for bulk staging load performance.
 - Populates dimensions at stable business grains.
@@ -109,7 +109,7 @@ Final warehouse validation status:
 ```text
 Staging rows:                         12,006,526
 Fact rows:                            12,006,526
-Duplicate source rows:                         0
+Duplicate staging row IDs:                     0
 Null mandatory fact keys:                      0
 Invalid action codes:                          0
 Invalid non-positive loan amounts:             0
@@ -173,7 +173,7 @@ The Power BI semantic model keeps reusable measures numeric, uses single-directi
 ## Recruiter-Facing Summary
 
 - Built a Python, PostgreSQL, and Power BI analytics project over 12,006,526 public HMDA mortgage application records across five states and three years.
-- Designed a validated star schema with five dimensions and one fact table, achieving 0 duplicate source rows, 0 unmatched dimension keys, and 0 staging-to-fact reconciliation difference.
+- Designed a validated star schema with five dimensions and one fact table, achieving 0 duplicate staging row IDs, 0 unmatched dimension keys, and 0 staging-to-fact reconciliation difference.
 - Optimized PostgreSQL staging loads with `COPY FROM STDIN`, reducing a 100,000-row benchmark from roughly 18 minutes to 9.788 seconds.
 - Enriched 3,783 lender records with official HMDA/FFIEC/CFPB metadata, reaching 98.12% human-readable lender-name coverage.
 - Delivered a six-page Power BI dashboard suite covering executive KPIs, approval and denial diagnostics, trends, state comparison, lender performance, and borrower segmentation.
@@ -257,7 +257,19 @@ Run automated tests with:
 python -m pytest -q
 ```
 
-Run warehouse validation against the existing PostgreSQL database with the validation-query path in `load_data.py` and `sql/06_validation_queries.sql`. The production ETL should not be rerun unless intentionally refreshing the warehouse.
+Check the existing warehouse without reloading it:
+
+```powershell
+python load_data.py --validate-only
+```
+
+This command uses the PostgreSQL settings in `.env`, executes only `sql/06_validation_queries.sql`, and exits nonzero when a check fails or no checks are returned. It does not create tables, truncate data, populate dimensions, or refresh views.
+
+Validation now checks duplicate fact mappings, missing and unknown source-row mappings, and fact/source year, loan amount, and income differences. Equal staging/fact totals alone do not establish one-to-one reconciliation. The historical staging-ID duplicate check tests primary-key integrity; it does not establish that the raw source contains no repeated records. The new checks have not yet been executed on the full warehouse.
+
+`etl_hmda.py` is the current raw-to-Parquet entry point and `load_data.py` is the current warehouse loader. The older `src.main` pipeline and legacy ETL guides are not the canonical rebuild path. The production ETL should not be rerun unless intentionally refreshing the warehouse.
+
+`Total HMDA Records` includes valid action codes 1–8. `Application Volume` includes codes 1–5, 7, and 8, excluding purchased loans (code 6). `Credit Decisions` includes codes 1–3. `Origination Rate` equals originated applications divided by `Credit Decisions`, and `Denial Rate` equals denied credit decisions divided by `Credit Decisions`. Preapproval outcomes 7 and 8 remain in `Application Volume` but are excluded from `Credit Decisions`. Borrower comparisons are descriptive and do not establish causation or discrimination.
 
 ## Project Goal
 

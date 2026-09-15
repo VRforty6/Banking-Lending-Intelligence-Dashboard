@@ -1,24 +1,216 @@
 {
   "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
   "name": "tableTopLenders",
-  "position": { "x": 360, "y": 215, "z": 5200, "height": 320, "width": 930, "tabOrder": 5200 },
+  "position": {
+    "x": 360,
+    "y": 75,
+    "z": 5200,
+    "height": 430,
+    "width": 1520,
+    "tabOrder": 5200
+  },
   "visual": {
     "visualType": "tableEx",
     "query": {
       "queryState": {
-        "Values": { "projections": [
-          { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics dim_lender" } }, "Property": "Lender Display" } }, "queryRef": "analytics dim_lender.Lender Display", "nativeQueryRef": "Lender" },
-          { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Application Volume Top 15 Lenders" } }, "queryRef": "analytics fact_loan_application.Application Volume Top 15 Lenders", "nativeQueryRef": "Applications" },
-          { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Origination Rate Top 15 Lenders" } }, "queryRef": "analytics fact_loan_application.Origination Rate Top 15 Lenders", "nativeQueryRef": "Origination Rate" },
-          { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Denial Rate Top 15 Lenders" } }, "queryRef": "analytics fact_loan_application.Denial Rate Top 15 Lenders", "nativeQueryRef": "Denial Rate" },
-          { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Average Originated Loan Amount Top 15 Lenders" } }, "queryRef": "analytics fact_loan_application.Average Originated Loan Amount Top 15 Lenders", "nativeQueryRef": "Avg Loan Amount" }
-        ] }
+        "Values": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics dim_lender"
+                    }
+                  },
+                  "Property": "Lender Display"
+                }
+              },
+              "queryRef": "analytics dim_lender.Lender Display",
+              "nativeQueryRef": "Lender"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "Application Volume Top 15 Lenders"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.Application Volume Top 15 Lenders",
+              "nativeQueryRef": "Applications",
+              "displayName": "Application Volume"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "Origination Rate Top 15 Lenders"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.Origination Rate Top 15 Lenders",
+              "nativeQueryRef": "Origination Rate",
+              "displayName": "Origination Rate"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "Denial Rate Top 15 Lenders"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.Denial Rate Top 15 Lenders",
+              "nativeQueryRef": "Denial Rate",
+              "displayName": "Denial Rate"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "Average Originated Loan Amount Top 15 Lenders"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.Average Originated Loan Amount Top 15 Lenders",
+              "nativeQueryRef": "Average originated amount",
+              "displayName": "Avg. Originated Loan Amount"
+            }
+          ]
+        },
+        "Tooltips": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "Credit Decisions"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.Credit Decisions",
+              "nativeQueryRef": "Credit decisions"
+            }
+          ]
+        }
       },
-      "sortDefinition": { "sort": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Application Volume Top 15 Lenders" } }, "direction": "Descending" } ], "isDefaultSort": true }
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "analytics fact_loan_application"
+                  }
+                },
+                "Property": "Application Volume Top 15 Lenders"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "objects": {
+      "columnHeaders": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "values": [
+        {
+          "properties": {
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "10D"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "grid": [
+        {
+          "properties": {
+            "rowPadding": {
+              "expr": {
+                "Literal": {
+                  "Value": "0D"
+                }
+              }
+            }
+          }
+        }
+      ]
     },
     "visualContainerObjects": {
-      "title": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Top lenders scorecard'" } } } } } ],
-      "subTitle": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Top 15 by application volume'" } } } } } ]
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Top 15 lenders scorecard'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Top 15 LEIs by applications; ties by LEI'"
+                }
+              }
+            }
+          }
+        }
+      ]
     },
     "drillFilterOtherVisuals": true
   }

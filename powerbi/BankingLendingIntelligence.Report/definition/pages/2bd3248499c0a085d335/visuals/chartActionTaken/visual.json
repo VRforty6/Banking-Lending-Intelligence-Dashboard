@@ -1,12 +1,12 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "chartActionTaken",
   "position": {
     "x": 40,
-    "y": 230,
+    "y": 200,
     "z": 1100,
-    "height": 360,
-    "width": 880,
+    "height": 350,
+    "width": 910,
     "tabOrder": 1100
   },
   "visual": {
@@ -27,7 +27,8 @@
                 }
               },
               "queryRef": "analytics dim_action_taken.Action Taken Label",
-              "nativeQueryRef": "Action Taken Label"
+              "nativeQueryRef": "Action Taken Label",
+              "active": true
             }
           ]
         },
@@ -41,11 +42,11 @@
                       "Entity": "analytics fact_loan_application"
                     }
                   },
-                  "Property": "Application Volume"
+                  "Property": "Total HMDA Records"
                 }
               },
-              "queryRef": "analytics fact_loan_application.Application Volume",
-              "nativeQueryRef": "Applications"
+              "queryRef": "analytics fact_loan_application.Total HMDA Records",
+              "nativeQueryRef": "HMDA Records"
             }
           ]
         }
@@ -60,7 +61,7 @@
                     "Entity": "analytics fact_loan_application"
                   }
                 },
-                "Property": "Application Volume"
+                "Property": "Total HMDA Records"
               }
             },
             "direction": "Descending"
@@ -69,42 +70,6 @@
         "isDefaultSort": true
       }
     },
-    "visualContainerObjects": {
-      "title": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "true"
-                }
-              }
-            },
-            "text": {
-              "expr": {
-                "Literal": {
-                  "Value": "'Application outcomes'"
-                }
-              }
-            }
-          }
-        }
-      ],
-      "subTitle": [
-        {
-          "properties": {
-            "show": {
-              "expr": {
-                "Literal": {
-                  "Value": "false"
-                }
-              }
-            }
-          }
-        }
-      ]
-    },
-    "drillFilterOtherVisuals": true,
     "objects": {
       "valueAxis": [
         {
@@ -146,6 +111,42 @@
           }
         }
       ]
-    }
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'HMDA records by action taken'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
   }
 }

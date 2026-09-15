@@ -1,24 +1,141 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "chartOutcomeApplicantSex",
-  "position": { "x": 1120, "y": 590, "z": 2301, "height": 410, "width": 760, "tabOrder": 2301 },
+  "position": {
+    "x": 1120,
+    "y": 590,
+    "z": 2301,
+    "height": 410,
+    "width": 760,
+    "tabOrder": 2301
+  },
   "visual": {
     "visualType": "clusteredBarChart",
     "query": {
       "queryState": {
-        "Category": { "projections": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics dim_applicant_profile" } }, "Property": "Applicant Sex Label" } }, "queryRef": "analytics dim_applicant_profile.Applicant Sex Label", "nativeQueryRef": "Applicant sex" } ] },
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics dim_applicant_profile"
+                    }
+                  },
+                  "Property": "Applicant Sex Label"
+                }
+              },
+              "queryRef": "analytics dim_applicant_profile.Applicant Sex Label",
+              "nativeQueryRef": "Applicant sex",
+              "active": true
+            }
+          ]
+        },
         "Y": {
           "projections": [
-            { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Origination Rate" } }, "queryRef": "analytics fact_loan_application.Origination Rate", "nativeQueryRef": "Origination Rate" },
-            { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Denial Rate" } }, "queryRef": "analytics fact_loan_application.Denial Rate", "nativeQueryRef": "Denial Rate" }
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "Origination Rate"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.Origination Rate",
+              "nativeQueryRef": "Origination Rate"
+            },
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "Denial Rate"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.Denial Rate",
+              "nativeQueryRef": "Denial Rate"
+            }
+          ]
+        },
+        "Tooltips": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "Credit Decisions"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.Credit Decisions",
+              "nativeQueryRef": "Credit decisions"
+            }
           ]
         }
       },
-      "sortDefinition": { "sort": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Origination Rate" } }, "direction": "Descending" } ], "isDefaultSort": true }
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "analytics fact_loan_application"
+                  }
+                },
+                "Property": "Origination Rate"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
     },
     "visualContainerObjects": {
-      "title": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Origination and denial rates by applicant sex'" } } } } } ],
-      "subTitle": [ { "properties": { "show": { "expr": { "Literal": { "Value": "false" } } } } } ]
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Origination and denial rates by applicant sex'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
     },
     "drillFilterOtherVisuals": true
   }

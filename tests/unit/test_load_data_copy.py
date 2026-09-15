@@ -170,3 +170,137 @@ def test_validation_runner_fetches_with_query_results():
     assert is_result_returning_validation_statement("SELECT 1")
     assert is_result_returning_validation_statement("  WITH counts AS (SELECT 1)")
     assert not is_result_returning_validation_statement("CREATE INDEX example")
+
+
+class ValidationConnection:
+    def __init__(self, rows):
+        self.rows = rows
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        return False
+
+    def execute(self, statement):
+        return SimpleNamespace(fetchall=lambda: self.rows)
+
+
+def validation_engine(statuses):
+    rows = [SimpleNamespace(_mapping={'check': name, 'status': status})
+            for name, status in statuses]
+    return SimpleNamespace(connect=lambda: ValidationConnection(rows))
+
+
+def test_validation_failure_stops_loader():
+    import pytest
+    from load_data import run_validations
+
+    with pytest.raises(RuntimeError, match='Missing mappings'):
+        run_validations(validation_engine([('Counts', 'PASS'), ('Missing mappings', 'FAIL')]))
+
+
+def test_validation_success_and_empty_results():
+    import pytest
+    from load_data import run_validations
+
+    run_validations(validation_engine([('Counts', 'PASS')]))
+    with pytest.raises(RuntimeError, match='no checks'):
+        run_validations(validation_engine([]))
+
+
+def test_connection_url_preserves_special_characters():
+    from load_data import get_db_connection_string
+
+    url = get_db_connection_string(dict(username='user', password='p@ss:/?#%',
+                                        host='localhost', port='5432', database='hmda'))
+    assert url.password == 'p@ss:/?#%'
+    assert url.host == 'localhost'
+    assert url.database == 'hmda'
+
+
+class TransactionEngine:
+    """Model transaction commit/rollback to inspect the loader boundary."""
+    def __init__(self):
+        self.current = ['old staging']
+        self.begins = 0
+
+    def begin(self):
+        self.begins += 1
+        engine = self
+
+        class Transaction:
+            def __enter__(self):
+                self.pending = list(engine.current)
+                return self
+
+            def execute(self, statement):
+                self.pending.clear()
+
+            def __exit__(self, exc_type, exc, traceback):
+                if exc_type is None:
+                    engine.current = self.pending
+                return False
+
+        return Transaction()
+
+
+def write_staging_fixture(path, rows=2):
+    import pyarrow as pa
+    import pyarrow.parquet as pq
+    columns = set(STAGING_COPY_COLUMNS) - {'stg_row_id', 'load_timestamp', 'profile_hash'}
+    pq.write_table(pa.Table.from_pydict({column: ['1'] * rows for column in columns}), path)
+
+
+def test_missing_or_empty_parquet_does_not_touch_staging(tmp_path, monkeypatch):
+    import pytest
+    import load_data
+
+    path = tmp_path / 'input.parquet'
+    monkeypatch.setattr(load_data, 'PARQUET_PATH', path)
+    engine = TransactionEngine()
+    with pytest.raises(FileNotFoundError):
+        load_data.load_staging_data(engine)
+    write_staging_fixture(path, rows=0)
+    with pytest.raises(ValueError, match='empty Parquet'):
+        load_data.load_staging_data(engine)
+    assert engine.begins == 0
+    assert engine.current == ['old staging']
+
+
+def test_failed_second_batch_rolls_back_entire_staging_load(tmp_path, monkeypatch):
+    import pytest
+    import load_data
+
+    path = tmp_path / 'input.parquet'
+    write_staging_fixture(path)
+    monkeypatch.setattr(load_data, 'PARQUET_PATH', path)
+    engine = TransactionEngine()
+    calls = []
+
+    def copy(connection, batch):
+        calls.append(batch['stg_row_id'].tolist())
+        connection.pending.extend(batch['stg_row_id'].tolist())
+        if len(calls) == 2:
+            raise RuntimeError('simulated COPY failure')
+
+    monkeypatch.setattr(load_data, 'copy_batch_to_staging', copy)
+    with pytest.raises(RuntimeError, match='simulated COPY failure'):
+        load_data.load_staging_data(engine, batch_size=1)
+    assert calls == [[1], [2]]
+    assert engine.begins == 1
+    assert engine.current == ['old staging']
+
+
+def test_successful_staging_load_commits_all_batches(tmp_path, monkeypatch):
+    import load_data
+
+    path = tmp_path / 'input.parquet'
+    write_staging_fixture(path)
+    monkeypatch.setattr(load_data, 'PARQUET_PATH', path)
+    engine = TransactionEngine()
+    monkeypatch.setattr(load_data, 'copy_batch_to_staging',
+                        lambda connection, batch: connection.pending.extend(batch['stg_row_id'].tolist()))
+    assert load_data.load_staging_data(engine, batch_size=1) == (2, 2)
+    assert engine.current == [1, 2]
+    assert engine.begins == 1

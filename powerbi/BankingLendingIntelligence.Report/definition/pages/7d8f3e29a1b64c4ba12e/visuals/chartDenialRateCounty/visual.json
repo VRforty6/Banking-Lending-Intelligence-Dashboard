@@ -1,19 +1,127 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "chartDenialRateCounty",
-  "position": { "x": 1420, "y": 210, "z": 2202, "height": 340, "width": 460, "tabOrder": 2202 },
+  "position": {
+    "x": 1460,
+    "y": 210,
+    "z": 2202,
+    "height": 340,
+    "width": 420,
+    "tabOrder": 2202
+  },
   "visual": {
     "visualType": "barChart",
     "query": {
       "queryState": {
-        "Category": { "projections": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics dim_geography" } }, "Property": "County Name" } }, "queryRef": "analytics dim_geography.County Name", "nativeQueryRef": "County" } ] },
-        "Y": { "projections": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Denial Rate" } }, "queryRef": "analytics fact_loan_application.Denial Rate", "nativeQueryRef": "Denial Rate" } ] }
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics dim_geography"
+                    }
+                  },
+                  "Property": "County Name"
+                }
+              },
+              "queryRef": "analytics dim_geography.County Name",
+              "nativeQueryRef": "County",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "Denial Rate"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.Denial Rate",
+              "nativeQueryRef": "Denial Rate"
+            }
+          ]
+        },
+        "Tooltips": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "Credit Decisions"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.Credit Decisions",
+              "nativeQueryRef": "Credit decisions"
+            }
+          ]
+        }
       },
-      "sortDefinition": { "sort": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Denial Rate" } }, "direction": "Descending" } ], "isDefaultSort": true }
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "analytics fact_loan_application"
+                  }
+                },
+                "Property": "Denial Rate"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
     },
     "visualContainerObjects": {
-      "title": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Denial rate by county'" } } } } } ],
-      "subTitle": [ { "properties": { "show": { "expr": { "Literal": { "Value": "false" } } } } } ]
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Denial rate by county'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
     },
     "drillFilterOtherVisuals": true
   }

@@ -1,7 +1,14 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "textPageHeading",
-  "position": { "x": 360, "y": 0, "z": 4400, "height": 34, "width": 700, "tabOrder": 4400 },
+  "position": {
+    "x": 360,
+    "y": 0,
+    "z": 4400,
+    "height": 34,
+    "width": 700,
+    "tabOrder": 4400
+  },
   "visual": {
     "visualType": "textbox",
     "objects": {
@@ -13,7 +20,11 @@
                 "textRuns": [
                   {
                     "value": "State Comparison",
-                    "textStyle": { "fontSize": "20pt", "fontFamily": "Segoe UI Semibold", "color": "#252423" }
+                    "textStyle": {
+                      "fontSize": "20pt",
+                      "fontFamily": "Segoe UI Semibold",
+                      "color": "#252423"
+                    }
                   }
                 ]
               }
@@ -21,7 +32,6 @@
           }
         }
       ]
-    },
-    "drillFilterOtherVisuals": false
+    }
   }
 }

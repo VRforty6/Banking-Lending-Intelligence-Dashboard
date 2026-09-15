@@ -1,20 +1,156 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "chartLoanPurposeMixState",
-  "position": { "x": 890, "y": 775, "z": 4302, "height": 245, "width": 990, "tabOrder": 4302 },
+  "position": {
+    "x": 890,
+    "y": 770,
+    "z": 4302,
+    "height": 275,
+    "width": 990,
+    "tabOrder": 4302
+  },
   "visual": {
-    "visualType": "barChart",
+    "visualType": "hundredPercentStackedBarChart",
     "query": {
       "queryState": {
-        "Category": { "projections": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics dim_geography" } }, "Property": "State Display" } }, "queryRef": "analytics dim_geography.State Display", "nativeQueryRef": "State" } ] },
-        "Series": { "projections": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics dim_loan" } }, "Property": "Loan Purpose Label" } }, "queryRef": "analytics dim_loan.Loan Purpose Label", "nativeQueryRef": "Loan purpose" } ] },
-        "Y": { "projections": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Application Volume" } }, "queryRef": "analytics fact_loan_application.Application Volume", "nativeQueryRef": "Applications" } ] }
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics dim_geography"
+                    }
+                  },
+                  "Property": "State Display"
+                }
+              },
+              "queryRef": "analytics dim_geography.State Display",
+              "nativeQueryRef": "State",
+              "active": true
+            }
+          ]
+        },
+        "Series": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics dim_loan"
+                    }
+                  },
+                  "Property": "Loan Purpose Label"
+                }
+              },
+              "queryRef": "analytics dim_loan.Loan Purpose Label",
+              "nativeQueryRef": "Loan purpose"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "Application Volume"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.Application Volume",
+              "nativeQueryRef": "Applications"
+            }
+          ]
+        }
       },
-      "sortDefinition": { "sort": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Application Volume" } }, "direction": "Descending" } ], "isDefaultSort": true }
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "analytics fact_loan_application"
+                  }
+                },
+                "Property": "Application Volume"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "objects": {
+      "legend": [
+        {
+          "properties": {
+            "position": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Top'"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "9D"
+                }
+              }
+            }
+          }
+        }
+      ]
     },
     "visualContainerObjects": {
-      "title": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Loan purpose mix by state'" } } } } } ],
-      "subTitle": [ { "properties": { "show": { "expr": { "Literal": { "Value": "false" } } } } } ]
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Application mix by loan purpose and state'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Share of applications; absolute applications in tooltips'"
+                }
+              }
+            }
+          }
+        }
+      ]
     },
     "drillFilterOtherVisuals": true
   }

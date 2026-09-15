@@ -29,7 +29,7 @@ from typing import List, Dict, Any, Tuple
 
 import pandas as pd
 from sqlalchemy import create_engine, text, exc
-from sqlalchemy.engine import Engine
+from sqlalchemy.engine import Engine, URL
 
 # Constants
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -206,11 +206,12 @@ def load_environment() -> Dict[str, str]:
         'password': os.getenv('POSTGRES_PASSWORD')
     }
 
-def get_db_connection_string(env: Dict[str, str]) -> str:
+def get_db_connection_string(env: Dict[str, str]) -> URL:
     """Build SQLAlchemy connection string."""
-    return (
-        f"postgresql://{env['username']}:{env['password']}"
-        f"@{env['host']}:{env['port']}/{env['database']}"
+    return URL.create(
+        "postgresql+psycopg2",
+        username=env['username'], password=env['password'],
+        host=env['host'], port=int(env['port']), database=env['database'],
     )
 
 def execute_sql_file(engine: Engine, filepath: Path) -> None:
@@ -434,37 +435,53 @@ def load_staging_data(engine: Engine, batch_size: int = 50000) -> Tuple[int, int
     batch_number = 0
     start_id = 1  # stg_row_id starts at 1
 
-    # Truncate the staging table to start fresh
+    # Inspect input before opening a write transaction. A failed batch rolls
+    # back both the truncate and all earlier batches, preserving old staging.
+    import pyarrow.parquet as pq
+    parquet_file = pq.ParquetFile(PARQUET_PATH)
+    if parquet_file.metadata.num_rows == 0:
+        raise ValueError("Refusing to replace staging with an empty Parquet file")
+    required_source_columns = set(STAGING_COPY_COLUMNS) - {
+        'stg_row_id', 'load_timestamp', 'profile_hash'
+    }
+    normalized_columns = [
+        str(column).strip().lower().replace("-", "_").replace(" ", "_")
+        for column in parquet_file.schema_arrow.names
+    ]
+    if len(normalized_columns) != len(set(normalized_columns)):
+        raise ValueError("Duplicate columns after normalization")
+    missing_columns = required_source_columns - set(normalized_columns)
+    if missing_columns:
+        raise ValueError(f"Parquet is missing staging columns: {sorted(missing_columns)}")
+
     with engine.begin() as conn:
         conn.execute(text("TRUNCATE TABLE staging.hmda_raw RESTART IDENTITY"))
-    logger.info("Truncated staging table.")
 
-    for batch_df in get_parquet_batches(PARQUET_PATH, batch_size=batch_size):
-        batch_number += 1
-        batch_size_actual = len(batch_df)
-        end_id = start_id + batch_size_actual - 1
+        for batch_df in get_parquet_batches(PARQUET_PATH, batch_size=batch_size):
+            batch_number += 1
+            batch_size_actual = len(batch_df)
+            end_id = start_id + batch_size_actual - 1
 
-        # Add staging columns
-        batch_df = batch_df.copy()
-        batch_df['stg_row_id'] = range(start_id, end_id + 1)
-        batch_df['load_timestamp'] = datetime.now()
+            # Add staging columns
+            batch_df = batch_df.copy()
+            batch_df['stg_row_id'] = range(start_id, end_id + 1)
+            batch_df['load_timestamp'] = datetime.now()
 
-        # Compute profile hash
-        batch_df['profile_hash'] = compute_profile_hash(batch_df, profile_columns)
+            # Compute profile hash
+            batch_df['profile_hash'] = compute_profile_hash(batch_df, profile_columns)
 
-        try:
-            with engine.begin() as conn:
+            try:
                 copy_batch_to_staging(conn, batch_df)
-            total_loaded += batch_size_actual
-            logger.info(
-                f"Loaded batch {batch_number} ({batch_size_actual} rows). "
-                f"Total loaded: {total_loaded}"
-            )
-        except Exception as e:
-            logger.error(f"Failed to load batch {batch_number}: {e}")
-            raise
+                total_loaded += batch_size_actual
+                logger.info(
+                    f"Loaded batch {batch_number} ({batch_size_actual} rows). "
+                    f"Total loaded: {total_loaded}"
+                )
+            except Exception as e:
+                logger.error(f"Failed to load batch {batch_number}: {e}")
+                raise
 
-        start_id = end_id + 1
+            start_id = end_id + 1
 
     logger.info(f"Finished loading {total_loaded} rows in {batch_number} batches.")
     return total_loaded, batch_number
@@ -709,6 +726,8 @@ def run_validations(engine: Engine) -> None:
         if stmt.strip()
     ]
 
+    failed_checks = []
+    check_count = 0
     with engine.connect() as conn:
         for statement in statements:
             if not statement:
@@ -722,13 +741,20 @@ def run_validations(engine: Engine) -> None:
                     logger.info(f"Validation query: {statement}")
                     for row in rows:
                         logger.info(f"  Result: {row}")
+                        check_count += 1
+                        if row._mapping['status'] != 'PASS':
+                            failed_checks.append(str(row._mapping['check']))
                 else:
                     # For non-SELECT, just log that it executed
                     logger.info(f"Validation statement executed: {statement[:100]}...")
             except Exception as e:
                 logger.error(f"Failed to execute validation query: {statement[:200]}...")
                 raise e
-    logger.info("Validation queries completed.")
+    if not check_count:
+        raise RuntimeError("Warehouse validation returned no checks")
+    if failed_checks:
+        raise RuntimeError("Warehouse validation failed: " + ", ".join(failed_checks))
+    logger.info("Validation queries completed: all checks passed.")
 
 def main() -> None:
     """Main ETL orchestration function."""
@@ -744,6 +770,12 @@ def main() -> None:
         # Step 2: Create database connection
         connection_string = get_db_connection_string(env)
         engine = create_engine(connection_string)
+
+        if sys.argv[1:] and sys.argv[1:] != ['--validate-only']:
+            raise ValueError("Usage: python load_data.py [--validate-only]")
+        if sys.argv[1:] == ['--validate-only']:
+            run_validations(engine)
+            return
 
         # Step 3: Test connection
         with engine.connect() as conn:

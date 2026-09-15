@@ -1,15 +1,108 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "kpiDeniedApplications",
-  "position": { "x": 976, "y": 40, "z": 2102, "height": 130, "width": 284, "tabOrder": 2102 },
+  "position": {
+    "x": 976,
+    "y": 40,
+    "z": 2102,
+    "height": 130,
+    "width": 284,
+    "tabOrder": 2102
+  },
   "visual": {
     "visualType": "cardVisual",
-    "query": { "queryState": { "Data": { "projections": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Denied Applications" } }, "queryRef": "analytics fact_loan_application.Denied Applications", "nativeQueryRef": "Denied Applications" } ] } } },
-    "visualContainerObjects": {
-      "title": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Denied applications'" } } } } } ],
-      "subTitle": [ { "properties": { "show": { "expr": { "Literal": { "Value": "false" } } } } } ]
+    "query": {
+      "queryState": {
+        "Data": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "Denied Applications"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.Denied Applications",
+              "nativeQueryRef": "Denied Applications"
+            }
+          ]
+        }
+      }
     },
-    "drillFilterOtherVisuals": true,
-    "objects": { "categoryLabels": [ { "properties": { "show": { "expr": { "Literal": { "Value": "false" } } } } } ] }
+    "objects": {
+      "label": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "value": [
+        {
+          "properties": {
+            "labelDisplayUnits": {
+              "expr": {
+                "Literal": {
+                  "Value": "1000000D"
+                }
+              }
+            },
+            "labelPrecision": {
+              "expr": {
+                "Literal": {
+                  "Value": "2L"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Denied applications'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
   }
 }

@@ -1,22 +1,114 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "chartIncomeVolume",
-  "position": { "x": 890, "y": 220, "z": 6201, "height": 250, "width": 500, "tabOrder": 6201 },
+  "position": {
+    "x": 890,
+    "y": 210,
+    "z": 6201,
+    "height": 250,
+    "width": 500,
+    "tabOrder": 6201
+  },
   "visual": {
     "visualType": "clusteredColumnChart",
     "query": {
       "queryState": {
-        "Category": { "projections": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Applicant Income Band" } }, "queryRef": "analytics fact_loan_application.Applicant Income Band", "nativeQueryRef": "Income band" } ] },
-        "Y": { "projections": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Application Volume" } }, "queryRef": "analytics fact_loan_application.Application Volume", "nativeQueryRef": "Applications" } ] }
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "Applicant Income Band"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.Applicant Income Band",
+              "nativeQueryRef": "Income band",
+              "active": true
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "Application Volume"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.Application Volume",
+              "nativeQueryRef": "Applications"
+            }
+          ]
+        }
       }
     },
-    "visualContainerObjects": {
-      "title": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Application volume by income band'" } } } } } ],
-      "subTitle": [ { "properties": { "show": { "expr": { "Literal": { "Value": "false" } } } } } ]
-    },
-    "drillFilterOtherVisuals": true,
     "objects": {
-      "valueAxis": [ { "properties": { "labelDisplayUnits": { "expr": { "Literal": { "Value": "1000D" } } }, "labelPrecision": { "expr": { "Literal": { "Value": "0L" } } } } } ]
-    }
+      "valueAxis": [
+        {
+          "properties": {
+            "labelDisplayUnits": {
+              "expr": {
+                "Literal": {
+                  "Value": "1000D"
+                }
+              }
+            },
+            "labelPrecision": {
+              "expr": {
+                "Literal": {
+                  "Value": "0L"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "visualContainerObjects": {
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Application volume by income band'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "false"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "drillFilterOtherVisuals": true
   }
 }

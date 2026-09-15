@@ -1,25 +1,157 @@
 {
-  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.0.0/schema.json",
+  "$schema": "https://developer.microsoft.com/json-schemas/fabric/item/report/definition/visualContainer/2.12.0/schema.json",
   "name": "chartLoanPurposeMixLender",
-  "position": { "x": 1135, "y": 835, "z": 5303, "height": 215, "width": 745, "tabOrder": 5303 },
+  "position": {
+    "x": 1135,
+    "y": 530,
+    "z": 5303,
+    "height": 500,
+    "width": 745,
+    "tabOrder": 5303
+  },
   "visual": {
-    "visualType": "barChart",
+    "visualType": "hundredPercentStackedBarChart",
     "query": {
       "queryState": {
-        "Category": { "projections": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics dim_lender" } }, "Property": "Lender Display" } }, "queryRef": "analytics dim_lender.Lender Display", "nativeQueryRef": "Lender" } ] },
-        "Series": { "projections": [ { "field": { "Column": { "Expression": { "SourceRef": { "Entity": "analytics dim_loan" } }, "Property": "Loan Purpose Label" } }, "queryRef": "analytics dim_loan.Loan Purpose Label", "nativeQueryRef": "Loan purpose" } ] },
-        "Y": { "projections": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Application Volume Top 10 Lenders" } }, "queryRef": "analytics fact_loan_application.Application Volume Top 10 Lenders", "nativeQueryRef": "Applications" } ] }
+        "Category": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics dim_lender"
+                    }
+                  },
+                  "Property": "Lender Display"
+                }
+              },
+              "queryRef": "analytics dim_lender.Lender Display",
+              "nativeQueryRef": "Lender",
+              "active": true
+            }
+          ]
+        },
+        "Series": {
+          "projections": [
+            {
+              "field": {
+                "Column": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics dim_loan"
+                    }
+                  },
+                  "Property": "Loan Purpose Label"
+                }
+              },
+              "queryRef": "analytics dim_loan.Loan Purpose Label",
+              "nativeQueryRef": "Loan purpose"
+            }
+          ]
+        },
+        "Y": {
+          "projections": [
+            {
+              "field": {
+                "Measure": {
+                  "Expression": {
+                    "SourceRef": {
+                      "Entity": "analytics fact_loan_application"
+                    }
+                  },
+                  "Property": "Application Volume Top 10 Lenders"
+                }
+              },
+              "queryRef": "analytics fact_loan_application.Application Volume Top 10 Lenders",
+              "nativeQueryRef": "Applications"
+            }
+          ]
+        }
       },
-      "sortDefinition": { "sort": [ { "field": { "Measure": { "Expression": { "SourceRef": { "Entity": "analytics fact_loan_application" } }, "Property": "Application Volume Top 10 Lenders" } }, "direction": "Descending" } ], "isDefaultSort": true }
+      "sortDefinition": {
+        "sort": [
+          {
+            "field": {
+              "Measure": {
+                "Expression": {
+                  "SourceRef": {
+                    "Entity": "analytics fact_loan_application"
+                  }
+                },
+                "Property": "Application Volume Top 10 Lenders"
+              }
+            },
+            "direction": "Descending"
+          }
+        ],
+        "isDefaultSort": true
+      }
+    },
+    "objects": {
+      "legend": [
+        {
+          "properties": {
+            "position": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Top'"
+                }
+              }
+            },
+            "fontSize": {
+              "expr": {
+                "Literal": {
+                  "Value": "9D"
+                }
+              }
+            }
+          }
+        }
+      ]
     },
     "visualContainerObjects": {
-      "title": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Loan purpose mix by lender'" } } } } } ],
-      "subTitle": [ { "properties": { "show": { "expr": { "Literal": { "Value": "true" } } }, "text": { "expr": { "Literal": { "Value": "'Top 10 by application volume'" } } } } } ]
+      "title": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Application mix by loan purpose — Top 10 lenders'"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "subTitle": [
+        {
+          "properties": {
+            "show": {
+              "expr": {
+                "Literal": {
+                  "Value": "true"
+                }
+              }
+            },
+            "text": {
+              "expr": {
+                "Literal": {
+                  "Value": "'Fixed Top 10 LEIs by applications; absolute applications in tooltips'"
+                }
+              }
+            }
+          }
+        }
+      ]
     },
-    "drillFilterOtherVisuals": true,
-    "objects": {
-      "valueAxis": [ { "properties": { "labelDisplayUnits": { "expr": { "Literal": { "Value": "1000D" } } }, "labelPrecision": { "expr": { "Literal": { "Value": "0L" } } } } } ],
-      "labels": [ { "properties": { "labelDisplayUnits": { "expr": { "Literal": { "Value": "1000D" } } }, "labelPrecision": { "expr": { "Literal": { "Value": "0L" } } } } } ]
-    }
+    "drillFilterOtherVisuals": true
   }
 }
