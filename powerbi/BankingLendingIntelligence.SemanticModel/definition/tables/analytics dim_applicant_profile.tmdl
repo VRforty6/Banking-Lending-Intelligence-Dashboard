@@ -114,13 +114,6 @@ table 'analytics dim_applicant_profile'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Applicant Race Label' = SWITCH('analytics dim_applicant_profile'[applicant_race_1], "1", "American Indian or Alaska Native", "2", "Asian", "3", "Black or African American", "4", "Native Hawaiian or Pacific Islander", "5", "White", "6", "Information not provided", "7", "Not applicable", "Unknown")
-		dataType: string
-		lineageTag: 8c707fa5-9fd6-4fca-a929-af19d7913571
-		summarizeBy: none
-
-		annotation SummarizationSetBy = Automatic
-
 	column applicant_race_2
 		dataType: string
 		lineageTag: 15264d4a-c547-4823-b745-b2fa9c80d0e5
@@ -209,13 +202,6 @@ table 'analytics dim_applicant_profile'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Applicant Sex Label' = SWITCH('analytics dim_applicant_profile'[applicant_sex], "1", "Male", "2", "Female", "3", "Information not provided", "4", "Not applicable", "6", "Both selected", "Unknown")
-		dataType: string
-		lineageTag: c0041051-1655-4a53-a0bd-b0686001a6de
-		summarizeBy: none
-
-		annotation SummarizationSetBy = Automatic
-
 	column co_applicant_sex
 		dataType: string
 		lineageTag: 1d252062-cdbc-44d9-bba0-f137d1162407
@@ -293,6 +279,40 @@ table 'analytics dim_applicant_profile'
 		lineageTag: bef9bb01-c845-42d7-a0d5-31870a7d9440
 		summarizeBy: none
 		sourceColumn: profile_hash
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Applicant Race Label' =
+			VAR Race1 = TRIM('analytics dim_applicant_profile'[applicant_race_1])
+			VAR Race2 = TRIM('analytics dim_applicant_profile'[applicant_race_2])
+			VAR Race3 = TRIM('analytics dim_applicant_profile'[applicant_race_3])
+			VAR Race4 = TRIM('analytics dim_applicant_profile'[applicant_race_4])
+			VAR Race5 = TRIM('analytics dim_applicant_profile'[applicant_race_5])
+			VAR Group1 = SWITCH(TRUE(), Race1 = "1", "American Indian or Alaska Native", Race1 IN { "2", "21", "22", "23", "24", "25", "26", "27" }, "Asian", Race1 = "3", "Black or African American", Race1 IN { "4", "41", "42", "43", "44" }, "Native Hawaiian or Other Pacific Islander", Race1 = "5", "White", Race1 = "6", "Information not provided", Race1 = "7", "Not applicable", BLANK())
+			VAR Group2 = SWITCH(TRUE(), Race2 = "1", "American Indian or Alaska Native", Race2 IN { "2", "21", "22", "23", "24", "25", "26", "27" }, "Asian", Race2 = "3", "Black or African American", Race2 IN { "4", "41", "42", "43", "44" }, "Native Hawaiian or Other Pacific Islander", Race2 = "5", "White", Race2 = "6", "Information not provided", Race2 = "7", "Not applicable", BLANK())
+			VAR Group3 = SWITCH(TRUE(), Race3 = "1", "American Indian or Alaska Native", Race3 IN { "2", "21", "22", "23", "24", "25", "26", "27" }, "Asian", Race3 = "3", "Black or African American", Race3 IN { "4", "41", "42", "43", "44" }, "Native Hawaiian or Other Pacific Islander", Race3 = "5", "White", Race3 = "6", "Information not provided", Race3 = "7", "Not applicable", BLANK())
+			VAR Group4 = SWITCH(TRUE(), Race4 = "1", "American Indian or Alaska Native", Race4 IN { "2", "21", "22", "23", "24", "25", "26", "27" }, "Asian", Race4 = "3", "Black or African American", Race4 IN { "4", "41", "42", "43", "44" }, "Native Hawaiian or Other Pacific Islander", Race4 = "5", "White", Race4 = "6", "Information not provided", Race4 = "7", "Not applicable", BLANK())
+			VAR Group5 = SWITCH(TRUE(), Race5 = "1", "American Indian or Alaska Native", Race5 IN { "2", "21", "22", "23", "24", "25", "26", "27" }, "Asian", Race5 = "3", "Black or African American", Race5 IN { "4", "41", "42", "43", "44" }, "Native Hawaiian or Other Pacific Islander", Race5 = "5", "White", Race5 = "6", "Information not provided", Race5 = "7", "Not applicable", BLANK())
+			VAR ReportedFieldCount = COUNTROWS(FILTER({ Race1, Race2, Race3, Race4, Race5 }, NOT ISBLANK([Value]) && [Value] <> ""))
+			VAR ReportedGroups = DISTINCT(FILTER({ Group1, Group2, Group3, Group4, Group5 }, NOT ISBLANK([Value])))
+			VAR BroadGroupCount = COUNTROWS(ReportedGroups)
+			RETURN
+			    SWITCH(
+			        TRUE(),
+			        ReportedFieldCount = 0 || BroadGroupCount = 0, "Unknown",
+			        BroadGroupCount = 1, MAXX(ReportedGroups, [Value]),
+			        "Multiple races reported"
+			    )
+		dataType: string
+		lineageTag: 8c707fa5-9fd6-4fca-a929-af19d7913571
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Applicant Sex Label' = SWITCH('analytics dim_applicant_profile'[applicant_sex], "1", "Male", "2", "Female", "3", "Information not provided", "4", "Not applicable", "6", "Both selected", "Unknown")
+		dataType: string
+		lineageTag: c0041051-1655-4a53-a0bd-b0686001a6de
+		summarizeBy: none
 
 		annotation SummarizationSetBy = Automatic
 
