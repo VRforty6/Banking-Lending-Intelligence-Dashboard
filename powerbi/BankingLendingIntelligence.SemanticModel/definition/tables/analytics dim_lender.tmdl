@@ -26,7 +26,30 @@ table 'analytics dim_lender'
 
 		annotation SummarizationSetBy = Automatic
 
-	column 'Lender Display' = COALESCE('analytics dim_lender'[lender_name], 'analytics dim_lender'[lei])
+	column 'Lender Display' =
+			VAR CleanName = TRIM('analytics dim_lender'[lender_name])
+			VAR CleanLei = TRIM('analytics dim_lender'[lei])
+			VAR HasName = NOT ISBLANK(CleanName) && CleanName <> ""
+			VAR DuplicateNameCount =
+			    IF(
+			        HasName,
+			        COUNTROWS(
+			            FILTER(
+			                ALL('analytics dim_lender'),
+			                TRIM('analytics dim_lender'[lender_name]) = CleanName
+			            )
+			        )
+			    )
+			RETURN
+			    IF(
+			        NOT HasName,
+			        CleanLei,
+			        IF(
+			            DuplicateNameCount > 1,
+			            CleanName & " (" & RIGHT(CleanLei, 6) & ")",
+			            CleanName
+			        )
+			    )
 		dataType: string
 		lineageTag: 2b64d233-8c2e-405b-bd86-3770864b5d07
 		summarizeBy: none

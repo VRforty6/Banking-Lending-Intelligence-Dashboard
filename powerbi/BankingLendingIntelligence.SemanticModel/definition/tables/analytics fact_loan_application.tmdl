@@ -1,6 +1,423 @@
 table 'analytics fact_loan_application'
 	lineageTag: 1d0fba4b-4045-4238-b786-bde9044a118d
 
+	measure 'Total HMDA Records' = COUNTROWS('analytics fact_loan_application')
+		formatString: #,0
+		displayFolder: Reporting Logic
+		lineageTag: 4a89d104-4ea8-4eb4-a51b-9cead4f335b7
+
+	measure 'Application Volume' =
+			CALCULATE(
+			    [Total HMDA Records],
+			    'analytics dim_action_taken'[action_taken] <> 6
+			)
+		formatString: #,0
+		displayFolder: Executive Overview
+		lineageTag: 81ccf2ac-b177-46dd-a0f9-e8c0a08b143c
+
+	measure 'Expected Fact Rows' = 12006526
+		formatString: #,0
+		displayFolder: Validation
+		lineageTag: cfefad92-25c9-4e17-a9b2-435a0a41c845
+
+	measure 'Fact Row Variance' = [Total HMDA Records] - [Expected Fact Rows]
+		formatString: #,0
+		displayFolder: Validation
+		lineageTag: 0f601f3b-d1f2-4a1d-a7a1-e2c776cddbb9
+
+	measure 'Originated Applications' =
+			CALCULATE(
+			    [Total HMDA Records],
+			    'analytics dim_action_taken'[action_taken] = 1
+			)
+		formatString: #,0
+		displayFolder: Executive Overview
+		lineageTag: 171bbce0-e379-48f9-9f19-33f9e9fcb744
+
+	measure 'Approved Not Accepted Applications' =
+			CALCULATE(
+			    [Total HMDA Records],
+			    'analytics dim_action_taken'[action_taken] = 2
+			)
+		formatString: #,0
+		displayFolder: Approval & Denial Analysis
+		lineageTag: b6fd1c73-b2ce-4264-91d8-8d51a78b38d3
+
+	measure 'Denied Applications' =
+			CALCULATE(
+			    [Total HMDA Records],
+			    'analytics dim_action_taken'[action_taken] = 3
+			)
+		formatString: #,0
+		displayFolder: Executive Overview
+		lineageTag: c5a390f8-1024-44b8-909a-a6dfe9215d2a
+
+	measure 'Withdrawn Applications' =
+			CALCULATE(
+			    [Total HMDA Records],
+			    'analytics dim_action_taken'[action_taken] = 4
+			)
+		formatString: #,0
+		displayFolder: Executive Overview
+		lineageTag: d20999e1-65d4-4462-aab0-218c1f9b46af
+
+	measure 'Incomplete Applications' =
+			CALCULATE(
+			    [Total HMDA Records],
+			    'analytics dim_action_taken'[action_taken] = 5
+			)
+		formatString: #,0
+		displayFolder: Executive Overview
+		lineageTag: 197f449c-e6bd-4d78-a61e-061562f67a41
+
+	measure 'Purchased Loans' =
+			CALCULATE(
+			    [Total HMDA Records],
+			    'analytics dim_action_taken'[action_taken] = 6
+			)
+		formatString: #,0
+		displayFolder: Executive Overview
+		lineageTag: 2b713c9d-47a6-4577-a8d8-945de5d08ab1
+
+	measure 'Preapproval Denied Applications' =
+			CALCULATE(
+			    [Total HMDA Records],
+			    'analytics dim_action_taken'[action_taken] = 7
+			)
+		formatString: #,0
+		displayFolder: Approval & Denial Analysis
+		lineageTag: 34bd6925-a2d3-4d0b-bc32-9be9c6f7d6bb
+
+	measure 'Preapproval Approved Not Accepted Applications' =
+			CALCULATE(
+			    [Total HMDA Records],
+			    'analytics dim_action_taken'[action_taken] = 8
+			)
+		formatString: #,0
+		displayFolder: Approval & Denial Analysis
+		lineageTag: 31f879cc-a662-4c1c-9d1f-8fc5437bc857
+
+	measure 'Credit Decisions' =
+			CALCULATE(
+			    [Total HMDA Records],
+			    'analytics dim_action_taken'[action_taken] IN { 1, 2, 3 }
+			)
+		formatString: #,0
+		displayFolder: Reporting Logic
+		lineageTag: 6732d414-a20b-42cb-a24d-a8b3756418fe
+
+	measure 'Denied Credit Decisions' = [Denied Applications]
+		formatString: #,0
+		displayFolder: Reporting Logic
+		lineageTag: 7f6344b2-1882-4e27-8d30-e8bf947f94fe
+
+	measure 'Origination Rate' = DIVIDE([Originated Applications], [Credit Decisions])
+		formatString: 0.0%
+		displayFolder: Executive Overview
+		lineageTag: a82448a7-4f7a-4614-ab14-a025a9533f5f
+
+	measure 'Denial Rate' = DIVIDE([Denied Credit Decisions], [Credit Decisions])
+		formatString: 0.0%
+		displayFolder: Executive Overview
+		lineageTag: 2079ec6d-c4dc-49a7-aa3c-46cb6ac6a85a
+
+	measure 'Withdrawal Rate' = DIVIDE([Withdrawn Applications], [Application Volume])
+		formatString: 0.0%
+		displayFolder: Executive Overview
+		lineageTag: 32fef576-8197-4bb2-8a50-5703955ca85d
+
+	measure 'Incomplete Rate' = DIVIDE([Incomplete Applications], [Application Volume])
+		formatString: 0.0%
+		displayFolder: Executive Overview
+		lineageTag: 054f3054-31e5-4364-9df9-2087c21e0349
+
+	measure 'Total Loan Amount' = SUM('analytics fact_loan_application'[loan_amount])
+		formatString: $#,0;($#,0);$#,0
+		displayFolder: Executive Overview
+		lineageTag: b6e96d4c-f224-42b4-a2f3-6cf0672be6d7
+
+	measure 'Average Originated Loan Amount' =
+			CALCULATE(
+			    AVERAGE('analytics fact_loan_application'[loan_amount]),
+			    'analytics dim_action_taken'[action_taken] = 1
+			)
+		formatString: $#,0;($#,0);$#,0
+		displayFolder: Executive Overview
+		lineageTag: 9d1e3f75-a30b-47f6-a7ab-ac9a15c188d4
+
+	measure 'Average Applicant Income' = AVERAGE('analytics fact_loan_application'[income])
+		formatString: $#,0K;($#,0K);$#,0K
+		displayFolder: Executive Overview
+		lineageTag: d2fbb45b-909d-4b35-bf60-848b2d7da428
+
+	measure 'Median Applicant Income' = MEDIAN('analytics fact_loan_application'[income])
+		formatString: $#,0K;($#,0K);$#,0K
+		displayFolder: Executive Overview
+		lineageTag: b46b0a9b-55aa-4d6b-b14a-5b0b9dfec62e
+
+	measure 'Distinct Lenders' = DISTINCTCOUNT('analytics dim_lender'[lei])
+		formatString: #,0
+		displayFolder: Executive Overview
+		lineageTag: 5b90c807-b108-4709-970e-4b021936c04d
+
+	measure 'Distinct Counties' = DISTINCTCOUNT('analytics dim_geography'[county_code])
+		formatString: #,0
+		displayFolder: Executive Overview
+		lineageTag: 06372094-83a2-41ce-973b-eaa5b5cc55e2
+
+	measure 'Application Volume YoY %' =
+			VAR CurrentYear = MAX('analytics fact_loan_application'[application_year])
+			VAR CurrentVolume =
+			    CALCULATE(
+			        [Application Volume],
+			        REMOVEFILTERS('analytics fact_loan_application'[application_year]),
+			        'analytics fact_loan_application'[application_year] = CurrentYear
+			    )
+			VAR PriorVolume =
+			    CALCULATE(
+			        [Application Volume],
+			        REMOVEFILTERS('analytics fact_loan_application'[application_year]),
+			        'analytics fact_loan_application'[application_year] = CurrentYear - 1
+			    )
+			RETURN
+			    IF(
+			        ISBLANK(CurrentYear) || ISBLANK(PriorVolume),
+			        BLANK(),
+			        DIVIDE(CurrentVolume - PriorVolume, PriorVolume)
+			    )
+		formatString: 0.0%
+		displayFolder: Multi-Year Lending Trends
+		lineageTag: 7d2e4a12-596b-4b6d-9bc5-f108d3c1bb76
+
+	measure 'Origination Rate YoY Change' =
+			VAR CurrentYear = MAX('analytics fact_loan_application'[application_year])
+			VAR CurrentRate =
+			    CALCULATE(
+			        [Origination Rate],
+			        REMOVEFILTERS('analytics fact_loan_application'[application_year]),
+			        'analytics fact_loan_application'[application_year] = CurrentYear
+			    )
+			VAR PriorRate =
+			    CALCULATE(
+			        [Origination Rate],
+			        REMOVEFILTERS('analytics fact_loan_application'[application_year]),
+			        'analytics fact_loan_application'[application_year] = CurrentYear - 1
+			    )
+			RETURN
+			    IF(
+			        ISBLANK(CurrentYear) || ISBLANK(PriorRate),
+			        BLANK(),
+			        (CurrentRate - PriorRate) * 100
+			    )
+		formatString: +0.0 "pp";-0.0 "pp";0.0 "pp"
+		displayFolder: Multi-Year Lending Trends
+		lineageTag: 41c38e86-3ea8-423a-b45e-0aa889560759
+
+	measure 'Denial Rate YoY Change' =
+			VAR CurrentYear = MAX('analytics fact_loan_application'[application_year])
+			VAR CurrentRate =
+			    CALCULATE(
+			        [Denial Rate],
+			        REMOVEFILTERS('analytics fact_loan_application'[application_year]),
+			        'analytics fact_loan_application'[application_year] = CurrentYear
+			    )
+			VAR PriorRate =
+			    CALCULATE(
+			        [Denial Rate],
+			        REMOVEFILTERS('analytics fact_loan_application'[application_year]),
+			        'analytics fact_loan_application'[application_year] = CurrentYear - 1
+			    )
+			RETURN
+			    IF(
+			        ISBLANK(CurrentYear) || ISBLANK(PriorRate),
+			        BLANK(),
+			        (CurrentRate - PriorRate) * 100
+			    )
+		formatString: +0.0 "pp";-0.0 "pp";0.0 "pp"
+		displayFolder: Multi-Year Lending Trends
+		lineageTag: 51c2e4da-f078-467c-a9f9-16c9a45cf745
+
+	measure 'YoY Comparison Years' =
+			VAR CurrentYear = MAX('analytics fact_loan_application'[application_year])
+			VAR PriorYear = CurrentYear - 1
+			VAR PriorRecords =
+			    CALCULATE(
+			        [Total HMDA Records],
+			        REMOVEFILTERS('analytics fact_loan_application'[application_year]),
+			        'analytics fact_loan_application'[application_year] = PriorYear
+			    )
+			RETURN
+			    IF(
+			        ISBLANK(CurrentYear) || ISBLANK(PriorRecords),
+			        BLANK(),
+			        FORMAT(CurrentYear, "0") & " vs " & FORMAT(PriorYear, "0")
+			    )
+		displayFolder: Multi-Year Lending Trends
+		lineageTag: 95fd35c2-df13-487f-84a3-c0f52e0cd5a8
+
+	measure 'Lender Ranking Application Volume' =
+			CALCULATE(
+			    [Application Volume],
+			    ALLSELECTED('analytics dim_geography'[State Display]),
+			    ALLSELECTED('analytics dim_loan'[Loan Purpose Label])
+			)
+		formatString: #,0
+		displayFolder: Lender Performance
+		lineageTag: dbd14c61-ecc6-42c9-8ea5-755a7ac94cb0
+
+	measure 'Lender Application Volume Rank' =
+			VAR CurrentLei = SELECTEDVALUE('analytics dim_lender'[lei])
+			VAR SelectedLeis =
+			    CALCULATETABLE(
+			        VALUES('analytics dim_lender'[lei]),
+			        ALLSELECTED('analytics dim_lender')
+			    )
+			VAR RankedLeis =
+			    ADDCOLUMNS(
+			        SelectedLeis,
+			        "@ApplicationVolume",
+			            VAR CandidateLei = 'analytics dim_lender'[lei]
+			            RETURN
+			                CALCULATE(
+			                    [Lender Ranking Application Volume],
+			                    REMOVEFILTERS('analytics dim_lender'),
+			                    'analytics dim_lender'[lei] = CandidateLei
+			                )
+			    )
+			VAR CurrentVolume =
+			    MAXX(
+			        FILTER(RankedLeis, 'analytics dim_lender'[lei] = CurrentLei),
+			        [@ApplicationVolume]
+			    )
+			VAR HigherOrTieBefore =
+			    COUNTROWS(
+			        FILTER(
+			            RankedLeis,
+			            NOT ISBLANK([@ApplicationVolume]) &&
+			            (
+			                [@ApplicationVolume] > CurrentVolume ||
+			                (
+			                    [@ApplicationVolume] = CurrentVolume &&
+			                    'analytics dim_lender'[lei] < CurrentLei
+			                )
+			            )
+			        )
+			    )
+			RETURN
+			    IF(
+			        ISBLANK(CurrentLei) || ISBLANK(CurrentVolume),
+			        BLANK(),
+			        HigherOrTieBefore + 1
+			    )
+		formatString: 0
+		displayFolder: Lender Performance
+		lineageTag: 253f0817-62b0-4c72-9341-081f6e4b3ae5
+
+	measure 'Is Top 15 Lender by Applications' = IF([Lender Application Volume Rank] <= 15, 1)
+		formatString: 0
+		displayFolder: Lender Performance
+		lineageTag: 6ba13dc1-aab0-4ef5-ab56-9700a2b6c078
+
+	measure 'Is Top 10 Lender by Applications' = IF([Lender Application Volume Rank] <= 10, 1)
+		formatString: 0
+		displayFolder: Lender Performance
+		lineageTag: 438a8600-a83d-42d8-91cf-0bd3c4119e8b
+
+	measure 'Application Volume Top 15 Lenders' =
+			VAR InLenderScope =
+			    ISINSCOPE('analytics dim_lender'[lei]) ||
+			    ISINSCOPE('analytics dim_lender'[Lender Display])
+			VAR TopLenders =
+			    FILTER(
+			        ALLSELECTED('analytics dim_lender'[lei]),
+			        [Lender Application Volume Rank] <= 15
+			    )
+			RETURN
+			    IF(
+			        InLenderScope,
+			        IF([Is Top 15 Lender by Applications] = 1, [Application Volume]),
+			        CALCULATE([Application Volume], KEEPFILTERS(TopLenders))
+			    )
+		formatString: #,0
+		displayFolder: Lender Performance
+		lineageTag: b9fba33f-7e8a-4cc2-8db5-c82bfc2b2f8a
+
+	measure 'Application Volume Top 10 Lenders' =
+			VAR InLenderScope =
+			    ISINSCOPE('analytics dim_lender'[lei]) ||
+			    ISINSCOPE('analytics dim_lender'[Lender Display])
+			VAR TopLenders =
+			    FILTER(
+			        ALLSELECTED('analytics dim_lender'[lei]),
+			        [Lender Application Volume Rank] <= 10
+			    )
+			RETURN
+			    IF(
+			        InLenderScope,
+			        IF([Is Top 10 Lender by Applications] = 1, [Application Volume]),
+			        CALCULATE([Application Volume], KEEPFILTERS(TopLenders))
+			    )
+		formatString: #,0
+		displayFolder: Lender Performance
+		lineageTag: cfb70316-e6bd-4f00-b633-d1453df8ef49
+
+	measure 'Origination Rate Top 15 Lenders' =
+			VAR InLenderScope =
+			    ISINSCOPE('analytics dim_lender'[lei]) ||
+			    ISINSCOPE('analytics dim_lender'[Lender Display])
+			VAR TopLenders =
+			    FILTER(
+			        ALLSELECTED('analytics dim_lender'[lei]),
+			        [Lender Application Volume Rank] <= 15
+			    )
+			RETURN
+			    IF(
+			        InLenderScope,
+			        IF([Is Top 15 Lender by Applications] = 1, [Origination Rate]),
+			        CALCULATE([Origination Rate], KEEPFILTERS(TopLenders))
+			    )
+		formatString: 0.0%
+		displayFolder: Lender Performance
+		lineageTag: 81bb88a8-963e-4b1f-b1b9-5624419406fc
+
+	measure 'Denial Rate Top 15 Lenders' =
+			VAR InLenderScope =
+			    ISINSCOPE('analytics dim_lender'[lei]) ||
+			    ISINSCOPE('analytics dim_lender'[Lender Display])
+			VAR TopLenders =
+			    FILTER(
+			        ALLSELECTED('analytics dim_lender'[lei]),
+			        [Lender Application Volume Rank] <= 15
+			    )
+			RETURN
+			    IF(
+			        InLenderScope,
+			        IF([Is Top 15 Lender by Applications] = 1, [Denial Rate]),
+			        CALCULATE([Denial Rate], KEEPFILTERS(TopLenders))
+			    )
+		formatString: 0.0%
+		displayFolder: Lender Performance
+		lineageTag: 9cc911f7-6104-41c0-92e6-e4b554258bd8
+
+	measure 'Average Originated Loan Amount Top 15 Lenders' =
+			VAR InLenderScope =
+			    ISINSCOPE('analytics dim_lender'[lei]) ||
+			    ISINSCOPE('analytics dim_lender'[Lender Display])
+			VAR TopLenders =
+			    FILTER(
+			        ALLSELECTED('analytics dim_lender'[lei]),
+			        [Lender Application Volume Rank] <= 15
+			    )
+			RETURN
+			    IF(
+			        InLenderScope,
+			        IF([Is Top 15 Lender by Applications] = 1, [Average Originated Loan Amount]),
+			        CALCULATE([Average Originated Loan Amount], KEEPFILTERS(TopLenders))
+			    )
+		formatString: $#,0;($#,0);$#,0
+		displayFolder: Lender Performance
+		lineageTag: cddc1162-ebd4-40c9-8ee1-3a98a266709c
+
 	column fact_loan_application_key
 		dataType: int64
 		formatString: 0
@@ -75,42 +492,6 @@ table 'analytics fact_loan_application'
 
 		annotation PBI_FormatHint = {"isGeneralNumber":true}
 
-	column 'Applicant Income Band' = ```
-			SWITCH(
-			    TRUE(),
-			    ISBLANK('analytics fact_loan_application'[income]), "Income not reported",
-			    'analytics fact_loan_application'[income] < 50, "Under $50K",
-			    'analytics fact_loan_application'[income] < 100, "$50K-$99K",
-			    'analytics fact_loan_application'[income] < 150, "$100K-$149K",
-			    'analytics fact_loan_application'[income] < 250, "$150K-$249K",
-			    "$250K+"
-			)
-			```
-		dataType: string
-		sortByColumn: 'Applicant Income Band Sort'
-		lineageTag: 2ab96e78-a704-4ccb-8d34-4d7a3cadf977
-		summarizeBy: none
-
-		annotation SummarizationSetBy = Automatic
-
-	column 'Applicant Income Band Sort' = ```
-			SWITCH(
-			    TRUE(),
-			    ISBLANK('analytics fact_loan_application'[income]), 99,
-			    'analytics fact_loan_application'[income] < 50, 1,
-			    'analytics fact_loan_application'[income] < 100, 2,
-			    'analytics fact_loan_application'[income] < 150, 3,
-			    'analytics fact_loan_application'[income] < 250, 4,
-			    5
-			)
-			```
-		dataType: int64
-		formatString: 0
-		lineageTag: 38bb1d17-0cf9-4a52-a051-18cf5ffc162d
-		summarizeBy: none
-
-		annotation SummarizationSetBy = Automatic
-
 	column application_year
 		dataType: int64
 		formatString: 0
@@ -143,248 +524,39 @@ table 'analytics fact_loan_application'
 
 		annotation SummarizationSetBy = Automatic
 
-	measure 'Application Volume' = COUNTROWS('analytics fact_loan_application')
-		formatString: #,0
-		displayFolder: Executive Overview
-		lineageTag: 81ccf2ac-b177-46dd-a0f9-e8c0a08b143c
-
-	measure 'Expected Fact Rows' = 12006526
-		formatString: #,0
-		displayFolder: Validation
-		lineageTag: cfefad92-25c9-4e17-a9b2-435a0a41c845
-
-	measure 'Fact Row Variance' = [Application Volume] - [Expected Fact Rows]
-		formatString: #,0
-		displayFolder: Validation
-		lineageTag: 0f601f3b-d1f2-4a1d-a7a1-e2c776cddbb9
-
-	measure 'Originated Applications' =
-
-			CALCULATE(
-			    [Application Volume],
-			    'analytics dim_action_taken'[action_taken] = 1
+	column 'Applicant Income Band' =
+			SWITCH(
+			    TRUE(),
+			    ISBLANK('analytics fact_loan_application'[income]), "Income not reported",
+			    'analytics fact_loan_application'[income] < 50, "Under $50K",
+			    'analytics fact_loan_application'[income] < 100, "$50K-$99K",
+			    'analytics fact_loan_application'[income] < 150, "$100K-$149K",
+			    'analytics fact_loan_application'[income] < 250, "$150K-$249K",
+			    "$250K+"
 			)
-		formatString: #,0
-		displayFolder: Executive Overview
-		lineageTag: 171bbce0-e379-48f9-9f19-33f9e9fcb744
+		dataType: string
+		lineageTag: 2ab96e78-a704-4ccb-8d34-4d7a3cadf977
+		summarizeBy: none
+		sortByColumn: 'Applicant Income Band Sort'
 
-	measure 'Approved Not Accepted Applications' =
+		annotation SummarizationSetBy = Automatic
 
-			CALCULATE(
-			    [Application Volume],
-			    'analytics dim_action_taken'[action_taken] = 2
+	column 'Applicant Income Band Sort' =
+			SWITCH(
+			    TRUE(),
+			    ISBLANK('analytics fact_loan_application'[income]), 99,
+			    'analytics fact_loan_application'[income] < 50, 1,
+			    'analytics fact_loan_application'[income] < 100, 2,
+			    'analytics fact_loan_application'[income] < 150, 3,
+			    'analytics fact_loan_application'[income] < 250, 4,
+			    5
 			)
-		formatString: #,0
-		displayFolder: Approval & Denial Analysis
-		lineageTag: b6fd1c73-b2ce-4264-91d8-8d51a78b38d3
-
-	measure 'Denied Applications' =
-
-			CALCULATE(
-			    [Application Volume],
-			    'analytics dim_action_taken'[action_taken] = 3
-			)
-		formatString: #,0
-		displayFolder: Executive Overview
-		lineageTag: c5a390f8-1024-44b8-909a-a6dfe9215d2a
-
-	measure 'Withdrawn Applications' =
-
-			CALCULATE(
-			    [Application Volume],
-			    'analytics dim_action_taken'[action_taken] = 4
-			)
-		formatString: #,0
-		displayFolder: Executive Overview
-		lineageTag: d20999e1-65d4-4462-aab0-218c1f9b46af
-
-	measure 'Incomplete Applications' =
-
-			CALCULATE(
-			    [Application Volume],
-			    'analytics dim_action_taken'[action_taken] = 5
-			)
-		formatString: #,0
-		displayFolder: Executive Overview
-		lineageTag: 197f449c-e6bd-4d78-a61e-061562f67a41
-
-	measure 'Purchased Loans' =
-
-			CALCULATE(
-			    [Application Volume],
-			    'analytics dim_action_taken'[action_taken] = 6
-			)
-		formatString: #,0
-		displayFolder: Executive Overview
-		lineageTag: 2b713c9d-47a6-4577-a8d8-945de5d08ab1
-
-	measure 'Origination Rate' = DIVIDE([Originated Applications], [Application Volume])
-		formatString: 0.0%
-		displayFolder: Executive Overview
-		lineageTag: a82448a7-4f7a-4614-ab14-a025a9533f5f
-
-	measure 'Denial Rate' = DIVIDE([Denied Applications], [Application Volume])
-		formatString: 0.0%
-		displayFolder: Executive Overview
-		lineageTag: 2079ec6d-c4dc-49a7-aa3c-46cb6ac6a85a
-
-	measure 'Withdrawal Rate' = DIVIDE([Withdrawn Applications], [Application Volume])
-		formatString: 0.0%
-		displayFolder: Executive Overview
-		lineageTag: 32fef576-8197-4bb2-8a50-5703955ca85d
-
-	measure 'Incomplete Rate' = DIVIDE([Incomplete Applications], [Application Volume])
-		formatString: 0.0%
-		displayFolder: Executive Overview
-		lineageTag: 054f3054-31e5-4364-9df9-2087c21e0349
-
-	measure 'Application Volume YoY %' = ```
-			VAR CurrentYear = MAX('analytics fact_loan_application'[application_year])
-			VAR CurrentVolume =
-			    CALCULATE(
-			        [Application Volume],
-			        REMOVEFILTERS('analytics fact_loan_application'[application_year]),
-			        'analytics fact_loan_application'[application_year] = CurrentYear
-			    )
-			VAR PriorVolume =
-			    CALCULATE(
-			        [Application Volume],
-			        REMOVEFILTERS('analytics fact_loan_application'[application_year]),
-			        'analytics fact_loan_application'[application_year] = CurrentYear - 1
-			    )
-			RETURN
-			    IF(
-			        ISBLANK(CurrentYear) || ISBLANK(PriorVolume),
-			        BLANK(),
-			        DIVIDE(CurrentVolume - PriorVolume, PriorVolume)
-			    )
-			```
-		formatString: 0.0%
-		displayFolder: Multi-Year Lending Trends
-		lineageTag: 7d2e4a12-596b-4b6d-9bc5-f108d3c1bb76
-
-	measure 'Origination Rate YoY Change' = ```
-			VAR CurrentYear = MAX('analytics fact_loan_application'[application_year])
-			VAR CurrentRate =
-			    CALCULATE(
-			        [Origination Rate],
-			        REMOVEFILTERS('analytics fact_loan_application'[application_year]),
-			        'analytics fact_loan_application'[application_year] = CurrentYear
-			    )
-			VAR PriorRate =
-			    CALCULATE(
-			        [Origination Rate],
-			        REMOVEFILTERS('analytics fact_loan_application'[application_year]),
-			        'analytics fact_loan_application'[application_year] = CurrentYear - 1
-			    )
-			RETURN
-			    IF(
-			        ISBLANK(CurrentYear) || ISBLANK(PriorRate),
-			        BLANK(),
-			        CurrentRate - PriorRate
-			    )
-			```
-		formatString: +0.0%;-0.0%;0.0%
-		displayFolder: Multi-Year Lending Trends
-		lineageTag: 41c38e86-3ea8-423a-b45e-0aa889560759
-
-	measure 'Denial Rate YoY Change' = ```
-			VAR CurrentYear = MAX('analytics fact_loan_application'[application_year])
-			VAR CurrentRate =
-			    CALCULATE(
-			        [Denial Rate],
-			        REMOVEFILTERS('analytics fact_loan_application'[application_year]),
-			        'analytics fact_loan_application'[application_year] = CurrentYear
-			    )
-			VAR PriorRate =
-			    CALCULATE(
-			        [Denial Rate],
-			        REMOVEFILTERS('analytics fact_loan_application'[application_year]),
-			        'analytics fact_loan_application'[application_year] = CurrentYear - 1
-			    )
-			RETURN
-			    IF(
-			        ISBLANK(CurrentYear) || ISBLANK(PriorRate),
-			        BLANK(),
-			        CurrentRate - PriorRate
-			    )
-			```
-		formatString: +0.0%;-0.0%;0.0%
-		displayFolder: Multi-Year Lending Trends
-		lineageTag: 51c2e4da-f078-467c-a9f9-16c9a45cf745
-
-	measure 'Lender Application Volume Rank' = ```
-			RANKX(
-			    ALLSELECTED('analytics dim_lender'[Lender Display]),
-			    [Application Volume],
-			    ,
-			    DESC,
-			    DENSE
-			)
-			```
+		dataType: int64
 		formatString: 0
-		displayFolder: Lender Performance
-		lineageTag: 253f0817-62b0-4c72-9341-081f6e4b3ae5
+		lineageTag: 38bb1d17-0cf9-4a52-a051-18cf5ffc162d
+		summarizeBy: none
 
-	measure 'Application Volume Top 15 Lenders' = IF([Lender Application Volume Rank] <= 15, [Application Volume])
-		formatString: #,0
-		displayFolder: Lender Performance
-		lineageTag: b9fba33f-7e8a-4cc2-8db5-c82bfc2b2f8a
-
-	measure 'Application Volume Top 10 Lenders' = IF([Lender Application Volume Rank] <= 10, [Application Volume])
-		formatString: #,0
-		displayFolder: Lender Performance
-		lineageTag: cfb70316-e6bd-4f00-b633-d1453df8ef49
-
-	measure 'Origination Rate Top 15 Lenders' = IF([Lender Application Volume Rank] <= 15, [Origination Rate])
-		formatString: 0.0%
-		displayFolder: Lender Performance
-		lineageTag: 81bb88a8-963e-4b1f-b1b9-5624419406fc
-
-	measure 'Denial Rate Top 15 Lenders' = IF([Lender Application Volume Rank] <= 15, [Denial Rate])
-		formatString: 0.0%
-		displayFolder: Lender Performance
-		lineageTag: 9cc911f7-6104-41c0-92e6-e4b554258bd8
-
-	measure 'Average Originated Loan Amount Top 15 Lenders' = IF([Lender Application Volume Rank] <= 15, [Average Originated Loan Amount])
-		formatString: "$#,0;($#,0);$#,0"
-		displayFolder: Lender Performance
-		lineageTag: cddc1162-ebd4-40c9-8ee1-3a98a266709c
-
-	measure 'Total Loan Amount' = SUM('analytics fact_loan_application'[loan_amount])
-		formatString: "$#,0;($#,0);$#,0"
-		displayFolder: Executive Overview
-		lineageTag: b6e96d4c-f224-42b4-a2f3-6cf0672be6d7
-
-	measure 'Average Originated Loan Amount' =
-
-			CALCULATE(
-			    AVERAGE('analytics fact_loan_application'[loan_amount]),
-			    'analytics dim_action_taken'[action_taken] = 1
-			)
-		formatString: "$#,0;($#,0);$#,0"
-		displayFolder: Executive Overview
-		lineageTag: 9d1e3f75-a30b-47f6-a7ab-ac9a15c188d4
-
-	measure 'Average Applicant Income' = AVERAGE('analytics fact_loan_application'[income])
-		formatString: "$#,0K;($#,0K);$#,0K"
-		displayFolder: Executive Overview
-		lineageTag: d2fbb45b-909d-4b35-bf60-848b2d7da428
-
-	measure 'Median Applicant Income' = MEDIAN('analytics fact_loan_application'[income])
-		formatString: "$#,0K;($#,0K);$#,0K"
-		displayFolder: Executive Overview
-		lineageTag: b46b0a9b-55aa-4d6b-b14a-5b0b9dfec62e
-
-	measure 'Distinct Lenders' = DISTINCTCOUNT('analytics dim_lender'[lei])
-		formatString: #,0
-		displayFolder: Executive Overview
-		lineageTag: 5b90c807-b108-4709-970e-4b021936c04d
-
-	measure 'Distinct Counties' = DISTINCTCOUNT('analytics dim_geography'[county_code])
-		formatString: #,0
-		displayFolder: Executive Overview
-		lineageTag: 06372094-83a2-41ce-973b-eaa5b5cc55e2
+		annotation SummarizationSetBy = Automatic
 
 	partition 'analytics fact_loan_application' = m
 		mode: import
