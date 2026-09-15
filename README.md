@@ -269,7 +269,7 @@ Validation now checks duplicate fact mappings, missing and unknown source-row ma
 
 `etl_hmda.py` is the current raw-to-Parquet entry point and `load_data.py` is the current warehouse loader. The older `src.main` pipeline and legacy ETL guides are not the canonical rebuild path. The production ETL should not be rerun unless intentionally refreshing the warehouse.
 
-`Application Volume` currently means all loaded HMDA records, including purchased loans and preapproval outcomes. `Origination Rate` and `Denial Rate` divide action codes 1 and 3 respectively by all those records; these are shares of loaded records, not decision-only approval/denial probabilities. Borrower comparisons are descriptive and do not establish causation or discrimination.
+`Total HMDA Records` includes valid action codes 1–8. `Application Volume` includes codes 1–5, 7, and 8, excluding purchased loans (code 6). `Credit Decisions` includes codes 1–3. `Origination Rate` equals originated applications divided by `Credit Decisions`, and `Denial Rate` equals denied credit decisions divided by `Credit Decisions`. Preapproval outcomes 7 and 8 remain in `Application Volume` but are excluded from `Credit Decisions`. Borrower comparisons are descriptive and do not establish causation or discrimination.
 
 ## Project Goal
 
