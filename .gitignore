@@ -48,6 +48,7 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+.pytest-tmp/
 
 # Environments
 .env
@@ -107,3 +108,13 @@ Thumbs.db
 # Local HMDA datasets
 data/raw/*.csv
 data/processed/*.parquet
+
+# Next.js analytics application
+web/node_modules/
+web/.next/
+web/out/
+web/coverage/
+web/.env.local
+web/.env.*.local
+web/*.tsbuildinfo
+.pnpm-store/

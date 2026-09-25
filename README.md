@@ -57,6 +57,33 @@ Raw CSV files are stored locally and intentionally excluded from Git because of 
 - Power BI PBIP, TMDL, and PBIR for the semantic model and report source files.
 - Git and GitHub for source control and documentation.
 
+## Interactive Web Analytics (Phase 1)
+
+The repository now also includes a production-oriented Next.js application in
+`web/`. Phase 1 delivers the application shell and Executive Overview while the
+existing ETL, PostgreSQL warehouse, validation suite, SQL reporting logic, and
+Power BI project remain the analytical source of truth.
+
+The browser receives only bounded aggregates from a parameterized server-side
+API. Exact Executive metrics, including non-additive median income, are served
+from the materialized views defined in `sql/09_create_web_analytics_views.sql`.
+
+Local setup:
+
+```powershell
+# Create/refresh the web aggregate layer with psql or your PostgreSQL client.
+psql -f sql/09_create_web_analytics_views.sql
+
+cd web
+pnpm install
+pnpm dev
+```
+
+The web server reads the existing repository-level `.env` when local database
+variables are not already injected. Database credentials are never exposed to
+client code. See `docs/WEB_ANALYTICS_AUDIT.md` for the source audit and
+`docs/WEB_PHASE1_IMPLEMENTATION.md` for implementation and verification details.
+
 ## Architecture
 
 ```mermaid

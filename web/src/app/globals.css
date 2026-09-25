@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #f6f8fb;
+  --foreground: #122033;
+  --chart-blue: #1f5eff;
+  --chart-teal: #0f8f83;
+  --chart-amber: #d78b09;
+  --chart-coral: #d55a52;
+}
+
+html {
+  background: var(--background);
+  color-scheme: light;
+}
+
+html.dark {
+  --background: #09111f;
+  --foreground: #e8eef7;
+  color-scheme: dark;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  min-width: 320px;
+}
+
+button,
+select,
+a,
+summary {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+select,
+a {
+  transition-duration: 160ms;
+  transition-property: background-color, border-color, color, opacity, transform;
+}
+
+button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.metric-value {
+  font-variant-numeric: tabular-nums lining-nums;
+  letter-spacing: -0.035em;
+}
+
+.chart-card {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0.11) 25%, rgba(148, 163, 184, 0.22) 50%, rgba(148, 163, 184, 0.11) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
