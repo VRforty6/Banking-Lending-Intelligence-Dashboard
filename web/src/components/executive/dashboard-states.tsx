@@ -2,9 +2,9 @@
 
 import { AlertTriangle, DatabaseZap, RotateCcw } from "lucide-react";
 
-export function DashboardSkeleton() {
+export function DashboardSkeleton({ label = "Loading executive analytics" }: { label?: string }) {
   return (
-    <div className="space-y-5" aria-label="Loading executive analytics" aria-busy="true">
+    <div className="space-y-5" aria-label={label} aria-busy="true">
       <div className="h-24 rounded-2xl skeleton-shimmer" />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         {Array.from({ length: 5 }, (_, index) => <div key={index} className="h-36 rounded-2xl skeleton-shimmer" />)}
@@ -33,13 +33,13 @@ export function DashboardError({ message, onRetry, onReset }: { message: string;
   );
 }
 
-export function EmptyDashboard({ onReset }: { onReset: () => void }) {
+export function EmptyDashboard({ onReset, description = "Try broadening the year, state, or loan-purpose filters. Missing observations are not converted to zero." }: { onReset: () => void; description?: string }) {
   return (
     <section className="grid min-h-[48vh] place-items-center rounded-3xl border border-dashed border-slate-300 bg-white p-8 text-center dark:border-slate-700 dark:bg-slate-900">
       <div className="max-w-md">
         <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-300"><DatabaseZap size={22} aria-hidden="true" /></span>
         <h2 className="mt-5 text-xl font-semibold text-slate-950 dark:text-white">No records match this view</h2>
-        <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">Try broadening the year, state, or loan-purpose filters. Missing observations are not converted to zero.</p>
+        <p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">{description}</p>
         <button type="button" onClick={onReset} className="mt-6 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950">Clear filters</button>
       </div>
     </section>

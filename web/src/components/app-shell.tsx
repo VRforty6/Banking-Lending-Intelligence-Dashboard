@@ -14,6 +14,8 @@ import {
   Users,
   X,
 } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import type { LucideIcon } from "lucide-react";
 
@@ -22,11 +24,11 @@ import { ThemeToggle } from "./theme-toggle";
 const navigation: ReadonlyArray<{
   label: string;
   icon: LucideIcon;
-  active?: boolean;
+  href?: string;
   phase?: number;
 }> = [
-  { label: "Executive Overview", icon: CircleGauge, active: true },
-  { label: "Geographic Explorer", icon: Map, phase: 2 },
+  { label: "Executive Overview", icon: CircleGauge, href: "/" },
+  { label: "Geographic Explorer", icon: Map, href: "/geography" },
   { label: "Approval & Denial", icon: ShieldCheck, phase: 4 },
   { label: "Multi-Year Trends", icon: TrendingUp, phase: 2 },
   { label: "Lender Explorer", icon: Building2, phase: 3 },
@@ -34,7 +36,8 @@ const navigation: ReadonlyArray<{
   { label: "Data Quality / Architecture", icon: Blocks, phase: 5 },
 ];
 
-function NavigationContent() {
+function NavigationContent({ onNavigate }: { onNavigate?: () => void }) {
+  const pathname = usePathname();
   return (
     <>
       <div className="flex h-20 items-center gap-3 px-5">
@@ -50,18 +53,33 @@ function NavigationContent() {
       <nav aria-label="Analytics sections" className="mt-3 flex-1 space-y-1 px-3">
         {navigation.map((item) => {
           const Icon = item.icon;
+          const active = item.href === pathname;
+          if (item.href) {
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                onClick={onNavigate}
+                aria-current={active ? "page" : undefined}
+                className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium ${active ? "bg-white/10 text-white" : "text-slate-400 hover:bg-white/[0.06] hover:text-white"}`}
+              >
+                <Icon size={17} aria-hidden="true" className={active ? "text-blue-300" : "text-slate-500"} />
+                <span className="flex-1 truncate">{item.label}</span>
+                {active ? <ChevronRight size={14} aria-hidden="true" className="text-slate-500" /> : null}
+              </Link>
+            );
+          }
           return (
             <button
               key={item.label}
               type="button"
-              disabled={!item.active}
-              aria-current={item.active ? "page" : undefined}
-              title={!item.active ? `Planned for Phase ${item.phase}` : undefined}
-              className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium ${item.active ? "bg-white/10 text-white" : "cursor-not-allowed text-slate-500"}`}
+              disabled
+              title={`Planned for Phase ${item.phase}`}
+              className="group flex w-full cursor-not-allowed items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-slate-500"
             >
-              <Icon size={17} aria-hidden="true" className={item.active ? "text-blue-300" : "text-slate-600"} />
+              <Icon size={17} aria-hidden="true" className="text-slate-600" />
               <span className="flex-1 truncate">{item.label}</span>
-              {item.active ? <ChevronRight size={14} aria-hidden="true" className="text-slate-500" /> : <span className="text-[10px] uppercase tracking-wider">P{item.phase}</span>}
+              <span className="text-[10px] uppercase tracking-wider">P{item.phase}</span>
             </button>
           );
         })}
@@ -79,6 +97,8 @@ function NavigationContent() {
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const pathname = usePathname();
+  const currentPage = navigation.find((item) => item.href === pathname)?.label ?? "Analytics";
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -93,7 +113,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <button type="button" onClick={() => setMobileOpen(false)} className="absolute right-3 top-5 grid size-9 place-items-center rounded-xl text-slate-400 hover:bg-white/10 hover:text-white" aria-label="Close navigation">
               <X size={19} aria-hidden="true" />
             </button>
-            <NavigationContent />
+            <NavigationContent onNavigate={() => setMobileOpen(false)} />
           </aside>
         </div>
       ) : null}
@@ -106,7 +126,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </button>
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-slate-400">Analytics workspace</p>
-              <p className="text-sm font-semibold text-slate-900 dark:text-white">Executive Overview</p>
+              <p className="text-sm font-semibold text-slate-900 dark:text-white">{currentPage}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">

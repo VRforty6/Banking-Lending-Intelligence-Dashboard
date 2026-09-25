@@ -57,12 +57,15 @@ Raw CSV files are stored locally and intentionally excluded from Git because of 
 - Power BI PBIP, TMDL, and PBIR for the semantic model and report source files.
 - Git and GitHub for source control and documentation.
 
-## Interactive Web Analytics (Phase 1)
+## Interactive Web Analytics (Phases 1 and 2A)
 
 The repository now also includes a production-oriented Next.js application in
 `web/`. Phase 1 delivers the application shell and Executive Overview while the
 existing ETL, PostgreSQL warehouse, validation suite, SQL reporting logic, and
-Power BI project remain the analytical source of truth.
+Power BI project remain the analytical source of truth. Phase 2A adds an
+interactive Geographic Explorer at `/geography` with an SVG state choropleth,
+state-to-county drill-down, lender/year filters, rate switching, URL-persisted
+state, human-readable Census county names, and an accessible ranked table.
 
 The browser receives only bounded aggregates from a parameterized server-side
 API. Exact Executive metrics, including non-additive median income, are served
@@ -73,6 +76,9 @@ Local setup:
 ```powershell
 # Create/refresh the web aggregate layer with psql or your PostgreSQL client.
 psql -f sql/09_create_web_analytics_views.sql
+# Phase 2A: create the geographic aggregate, then load the generated county seed.
+psql -f sql/10_create_phase2_geography.sql
+psql -f sql/generated/10_county_reference_seed.sql
 
 cd web
 pnpm install
@@ -83,6 +89,9 @@ The web server reads the existing repository-level `.env` when local database
 variables are not already injected. Database credentials are never exposed to
 client code. See `docs/WEB_ANALYTICS_AUDIT.md` for the source audit and
 `docs/WEB_PHASE1_IMPLEMENTATION.md` for implementation and verification details.
+See `docs/PHASE2_DESIGN_AUDIT.md` and
+`docs/Phase-2-Implementation-Report.md` for the Phase 2A design, county-reference
+lineage, reconciliation evidence, and browser verification.
 
 ## Architecture
 
